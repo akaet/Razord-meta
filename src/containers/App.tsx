@@ -23,9 +23,9 @@ export default function App () {
     const routes = [
     // { path: '/', name: 'Overview', component: Overview, exact: true },
         { path: '/proxies', name: 'Proxies', element: <Proxies /> },
+        { path: '/connections', name: 'Connections', element: <Connections />, noMobile: false },
         { path: '/logs', name: 'Logs', element: <Logs /> },
         { path: '/rules', name: 'Rules', element: <Rules />, noMobile: true },
-        { path: '/connections', name: 'Connections', element: <Connections />, noMobile: false },
         { path: '/settings', name: 'Settings', element: <Settings /> },
     ]
 
