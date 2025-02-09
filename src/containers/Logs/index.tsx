@@ -44,6 +44,10 @@ export default function Logs () {
     useEffect(() => {
         function handleLog (newLogs: Log[]) {
             logsRef.current = logsRef.current.slice().concat(newLogs.map(d => ({ ...d, time: new Date() })))
+
+            if (logsRef.current.length > 500) {
+                logsRef.current = logsRef.current.slice(logsRef.current.length - 300)
+            }
             setLogs(logsRef.current)
         }
 
