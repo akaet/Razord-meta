@@ -72,7 +72,7 @@ export interface Proxy {
 
 export interface Group {
     name: string
-    type: 'Selector' | 'URLTest' | 'Fallback'
+    type: 'Selector' | 'URLTest' | 'Fallback' | 'Smart'
     now: string
     all: string[]
     history: History[]

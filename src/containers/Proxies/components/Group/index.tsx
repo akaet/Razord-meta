@@ -59,7 +59,7 @@ export function Group (props: GroupProps) {
                     data={config.all}
                     onClick={handleChangeProxySelected}
                     errSet={errSet}
-                    select={config.now}
+                    select={config.now} // Smart groups may not have a selected proxy, because config.new is "Smart - Select"
                     canClick={canClick}
                     rowHeight={30} />
             </div>

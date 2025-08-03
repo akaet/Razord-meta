@@ -63,7 +63,7 @@ export interface Socks5Proxy {
     port?: number
 }
 
-export type ProxyGroup = SelectProxyGroup & UrlTestProxyGroup & FallbackProxyGroup & LoadBalanceGroup
+export type ProxyGroup = SelectProxyGroup & UrlTestProxyGroup & FallbackProxyGroup & LoadBalanceGroup & SmartProxyGroup
 
 export interface SelectProxyGroup {
     name?: string
@@ -103,4 +103,20 @@ export interface UrlTestProxyGroup {
     url?: string
 
     interval?: number // second
+}
+
+export interface SmartProxyGroup {
+    name?: string
+
+    type?: 'smart'
+
+    proxies?: string[] // proxy names
+
+    url?: string
+
+    useLightGBM?: boolean
+
+    collectData?: boolean
+
+    strategy?: string
 }
