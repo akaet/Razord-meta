@@ -25,6 +25,7 @@ const EN = {
             thresholdYellow: 'Yellow Threshold (ms)',
             thresholdRed: 'Red Threshold (ms)',
             speedTestUrl: 'Speed Test URL',
+            speedTestTimeout: 'Speed Test Timeout (ms)',
         },
         values: {
             cn: '中文',

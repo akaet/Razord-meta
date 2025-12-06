@@ -22,7 +22,7 @@ export function Proxy (props: ProxyProps) {
     const { set } = useProxy()
     const client = useClient()
 
-    const { data: { thresholdYellow = 300, thresholdRed = 600, speedTestUrl } } = useConfig()
+    const { data: { thresholdYellow = 300, thresholdRed = 600, speedTestUrl, speedTestTimeout } } = useConfig()
 
     const getDelay = useCallback(async (name: string) => {
         if (isClashX()) {
@@ -30,9 +30,9 @@ export function Proxy (props: ProxyProps) {
             return delay
         }
 
-        const { data: { delay } } = await client.getProxyDelay(name, speedTestUrl)
+        const { data: { delay } } = await client.getProxyDelay(name, speedTestUrl, speedTestTimeout)
         return delay
-    }, [client, speedTestUrl])
+    }, [client, speedTestUrl, speedTestTimeout])
 
     const speedTest = useCallback(async function () {
         const result = await ResultAsync.fromPromise(getDelay(config.name), e => e as AxiosError)

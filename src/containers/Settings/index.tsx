@@ -30,6 +30,7 @@ export default function Settings () {
         thresholdYellow: 300,
         thresholdRed: 600,
         speedTestUrl: '',
+        speedTestTimeout: 5000,
     })
 
     useEffect(() => {
@@ -40,6 +41,7 @@ export default function Settings () {
         set('thresholdYellow', configData.thresholdYellow ?? 260)
         set('thresholdRed', configData.thresholdRed ?? 600)
         set('speedTestUrl', configData.speedTestUrl ?? 'http://www.gstatic.com/generate_204')
+        set('speedTestTimeout', configData.speedTestTimeout ?? 5000)
     }, [general, configData, set])
 
     async function handleProxyModeChange (mode: string) {
@@ -220,6 +222,15 @@ export default function Settings () {
                             value={info.thresholdRed}
                             onChange={thresholdRed => set('thresholdRed', +thresholdRed)}
                             onBlur={() => setConfig(draft => { draft.thresholdRed = info.thresholdRed })}
+                        />
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.speedTestTimeout')}</span>
+                        <Input
+                            className="w-28"
+                            value={info.speedTestTimeout}
+                            onChange={speedTestTimeout => set('speedTestTimeout', +speedTestTimeout)}
+                            onBlur={() => setConfig(draft => { draft.speedTestTimeout = info.speedTestTimeout })}
                         />
                     </div>
                     <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">

@@ -24,7 +24,7 @@ export function Group (props: GroupProps) {
         // Only URLTest can have fixed nodes. Clicking a fixed node again will unfix it
         if (props.config.type === 'URLTest' && props.config.fixed === name) {
             // Speed test will automatically unfix the node
-            await client.getGroupDelay(props.config.name, Config.speedTestUrl)
+            await client.getGroupDelay(props.config.name, Config.speedTestUrl, Config.speedTestTimeout)
             // Trigger remote update to quickly reflect the unfixed result (will update to the lowest latency node)
             await update()
         } else {

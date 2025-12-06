@@ -25,6 +25,7 @@ const CN = {
             thresholdYellow: '黄色的阈值 (ms)',
             thresholdRed: '红色的阈值 (ms)',
             speedTestUrl: '测速地址',
+            speedTestTimeout: '测速超时 (ms)',
         },
         values: {
             cn: '中文',

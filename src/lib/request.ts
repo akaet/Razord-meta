@@ -171,19 +171,19 @@ export class Client {
         return await this.axiosClient.get<{ version: string, premium?: boolean, meta?: boolean }>('version')
     }
 
-    async getProxyDelay (name: string, speedTestUrl?: string) {
+    async getProxyDelay(name: string, speedTestUrl?: string, timeout = 5000) {
         return await this.axiosClient.get<{ delay: number }>(`proxies/${encodeURIComponent(name)}/delay`, {
             params: {
-                timeout: 5000,
+                timeout,
                 url: speedTestUrl || 'http://www.gstatic.com/generate_204',
             },
         })
     }
 
-    async getGroupDelay (name: string, speedTestUrl?: string) {
+    async getGroupDelay(name: string, speedTestUrl?: string, timeout = 5000) {
         return await this.axiosClient.get<{ delay: number }>(`group/${encodeURIComponent(name)}/delay`, {
             params: {
-                timeout: 5000,
+                timeout,
                 url: speedTestUrl || 'http://www.gstatic.com/generate_204',
             },
         })
