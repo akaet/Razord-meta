@@ -46,6 +46,7 @@ const CN = {
     Logs: {
         title: '日志',
         levelLabel: '日志等级',
+        search: '搜索 | Regex',
     },
     Rules: {
         title: '规则',

@@ -46,6 +46,7 @@ const EN = {
     Logs: {
         title: 'Logs',
         levelLabel: 'Log level',
+        search: 'Search | Regex',
     },
     Rules: {
         title: 'Rules',

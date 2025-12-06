@@ -19,3 +19,28 @@ $height: 30px;
         box-shadow: 0 2px 5px rgba($color: $color-primary, $alpha: 0.5);
     }
 }
+
+.input-wrapper {
+    position: relative;
+    display: inline-block;
+
+    .input {
+        &.with-clear {
+            padding-right: 30px;
+        }
+    }
+
+    .clear-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        width: 14px;
+        height: 14px;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+}

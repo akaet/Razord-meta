@@ -1,0 +1,70 @@
+.history-input-wrapper {
+    position: relative;
+    display: inline-block;
+
+    .history-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #e4e7ed;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        margin-top: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+
+        .history-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #606266;
+
+            &:hover {
+                background-color: #f5f7fa;
+            }
+
+            .delete-icon {
+                width: 14px;
+                height: 14px;
+                cursor: pointer;
+                opacity: 0.6;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}
+
+.dark {
+    .history-input-wrapper {
+        .history-dropdown {
+            background-color: #3f3f3f;
+            border-color: #4c4d4f;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+
+            .history-item {
+                color: #e5eaf3;
+
+                &:hover {
+                    background-color: #4a4a4a;
+                }
+
+                .delete-icon {
+                    color: #909399;
+
+                    &:hover {
+                        color: #f56c6c;
+                    }
+                }
+            }
+        }
+    }
+}
