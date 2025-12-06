@@ -91,6 +91,7 @@ export const configAtom = atomWithStorage('profile', {
     logLevel: '',
     thresholdYellow: 300,
     thresholdRed: 600,
+    speedTestUrl: 'http://www.gstatic.com/generate_204',
 })
 
 export function useConfig () {

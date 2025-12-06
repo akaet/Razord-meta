@@ -24,6 +24,7 @@ const EN = {
             externalController: 'External controller',
             thresholdYellow: 'Yellow Threshold (ms)',
             thresholdRed: 'Red Threshold (ms)',
+            speedTestUrl: 'Speed Test URL',
         },
         values: {
             cn: '中文',

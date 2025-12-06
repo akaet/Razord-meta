@@ -29,6 +29,7 @@ export default function Settings () {
         redirProxyPort: 7892,
         thresholdYellow: 300,
         thresholdRed: 600,
+        speedTestUrl: '',
     })
 
     useEffect(() => {
@@ -38,6 +39,7 @@ export default function Settings () {
         set('redirProxyPort', general?.redirPort ?? 0)
         set('thresholdYellow', configData.thresholdYellow ?? 260)
         set('thresholdRed', configData.thresholdRed ?? 600)
+        set('speedTestUrl', configData.speedTestUrl ?? 'http://www.gstatic.com/generate_204')
     }, [general, configData, set])
 
     async function handleProxyModeChange (mode: string) {
@@ -218,6 +220,16 @@ export default function Settings () {
                             value={info.thresholdRed}
                             onChange={thresholdRed => set('thresholdRed', +thresholdRed)}
                             onBlur={() => setConfig(draft => { draft.thresholdRed = info.thresholdRed })}
+                        />
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{ t('labels.speedTestUrl') }</span>
+                        <Input
+                            className="ml-auto"
+                            style={{ width: `${Math.max(200, (String(info.speedTestUrl).length + 3) * 7.5)}px` }}
+                            value={info.speedTestUrl}
+                            onChange={speedTestUrl => set('speedTestUrl', speedTestUrl)}
+                            onBlur={() => setConfig(draft => { draft.speedTestUrl = info.speedTestUrl })}
                         />
                     </div>
                 </div>

@@ -22,15 +22,17 @@ export function Proxy (props: ProxyProps) {
     const { set } = useProxy()
     const client = useClient()
 
+    const { data: { thresholdYellow = 300, thresholdRed = 600, speedTestUrl } } = useConfig()
+
     const getDelay = useCallback(async (name: string) => {
         if (isClashX()) {
             const delay = await jsBridge?.getProxyDelay(name) ?? 0
             return delay
         }
 
-        const { data: { delay } } = await client.getProxyDelay(name)
+        const { data: { delay } } = await client.getProxyDelay(name, speedTestUrl)
         return delay
-    }, [client])
+    }, [client, speedTestUrl])
 
     const speedTest = useCallback(async function () {
         const result = await ResultAsync.fromPromise(getDelay(config.name), e => e as AxiosError)
@@ -54,8 +56,6 @@ export function Proxy (props: ProxyProps) {
         EE.subscribe(Action.SPEED_NOTIFY, handler)
         return () => EE.unsubscribe(Action.SPEED_NOTIFY, handler)
     }, [speedTest])
-
-    const { data: { thresholdYellow = 300, thresholdRed = 600 } } = useConfig()
 
     const TagColors = useMemo(() => ({
         '#909399': 0,
