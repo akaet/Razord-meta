@@ -88,17 +88,12 @@ class Store {
 
 export function useConnections () {
     const store = useMemo(() => new Store(), [])
-    const shouldFlush = useRef(true)
     const [connections, setConnections] = useState<Connection[]>([])
     const [save, setSave] = useState<boolean>(false)
 
     const feed = useCallback(function (connections: API.Connections[]) {
         store.appendToSet(connections)
-        if (shouldFlush.current) {
-            setConnections(store.getConnections())
-        }
-
-        shouldFlush.current = !shouldFlush.current
+        setConnections(store.getConnections())
     }, [store])
 
     const toggleSave = useCallback(function () {
@@ -108,8 +103,6 @@ export function useConnections () {
         if (!state) {
             setConnections(store.getConnections())
         }
-
-        shouldFlush.current = true
     }, [store])
 
     return { connections, feed, toggleSave, save }
