@@ -57,6 +57,7 @@ const EN = {
     Connections: {
         title: 'Connections',
         keepClosed: 'Keep closed connections',
+        search: 'Search | Regex',
         total: {
             text: 'total',
             upload: 'upload',

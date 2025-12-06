@@ -5,7 +5,7 @@ import produce from 'immer'
 import { groupBy } from 'lodash-es'
 import { useMemo, useLayoutEffect, useRef, useState, useEffect } from 'react'
 
-import { Header, Checkbox, Modal, Icon, Drawer, Card, Button } from '@components'
+import { Header, Checkbox, Modal, Icon, Drawer, Card, Button, HistoryInput } from '@components'
 import { fromNow } from '@lib/date'
 import { basePath, formatTraffic } from '@lib/helper'
 import { useObject, useVisible } from '@lib/hook'
@@ -73,26 +73,59 @@ export default function Connections () {
 
     // connections
     const { connections, feed, save, toggleSave } = useConnections()
-    const data: FormatConnection[] = useMemo(() => connections.map(
-        c => ({
-            id: c.id,
-            host: `${c.metadata.host || c.metadata.destinationIP}:${c.metadata.destinationPort}`,
-            sniffHost: c.metadata.sniffHost,
-            chains: c.chains.slice().reverse().join(' / '),
-            rule: c.rulePayload ? `${c.rule} :: ${c.rulePayload}` : c.rule,
-            time: new Date(c.start).getTime(),
-            upload: c.upload,
-            download: c.download,
-            sourceIP: c.metadata.sourceIP,
-            destinationIP: `${c.metadata.remoteDestination || c.metadata.destinationIP || c.metadata.host}`,
-            type: c.metadata.type,
-            network: c.metadata.network.toUpperCase(),
-            process: c.metadata.processPath,
-            speed: { upload: c.uploadSpeed, download: c.downloadSpeed },
-            completed: !!c.completed,
-            original: c,
-        }),
-    ), [connections])
+    const [searchText, setSearchText] = useState('')
+    const data: FormatConnection[] = useMemo(() => {
+        let result = connections.map(
+            c => ({
+                id: c.id,
+                host: `${c.metadata.host || c.metadata.destinationIP}:${c.metadata.destinationPort}`,
+                sniffHost: c.metadata.sniffHost,
+                chains: c.chains.slice().reverse().join(' / '),
+                rule: c.rulePayload ? `${c.rule} :: ${c.rulePayload}` : c.rule,
+                time: new Date(c.start).getTime(),
+                upload: c.upload,
+                download: c.download,
+                sourceIP: c.metadata.sourceIP,
+                destinationIP: `${c.metadata.remoteDestination || c.metadata.destinationIP || c.metadata.host}`,
+                type: c.metadata.type,
+                network: c.metadata.network.toUpperCase(),
+                process: c.metadata.processPath,
+                speed: { upload: c.uploadSpeed, download: c.downloadSpeed },
+                completed: !!c.completed,
+                original: c,
+            }),
+        )
+
+        if (searchText !== '') {
+            const lowerSearchText = searchText.toLowerCase()
+            let reg: RegExp | null = null
+            try {
+                reg = new RegExp(searchText, 'i')
+            } catch (e) {
+                // ignore
+            }
+
+            result = result.filter(c => {
+                const fields = [
+                    c.host,
+                    c.sourceIP,
+                    c.destinationIP,
+                    c.chains,
+                    c.rule,
+                    c.type,
+                    c.network,
+                    c.process,
+                ]
+
+                if (reg) {
+                    return fields.some(f => f && reg!.test(f))
+                }
+                return fields.some(f => f && f.toLowerCase().includes(lowerSearchText))
+            })
+        }
+
+        return result
+    }, [connections, searchText])
     const devices = useMemo(() => {
         const gb = groupBy(connections, 'metadata.sourceIP')
         return Object.keys(gb)
@@ -294,7 +327,18 @@ export default function Connections () {
                 <span className="cursor-default flex-1 connections-filter">
                     {`(${t('total.text')}: ${t('total.upload')} ${formatTraffic(traffic.uploadTotal)} ${t('total.download')} ${formatTraffic(traffic.downloadTotal)})`}
                 </span>
-                <Checkbox className="connections-filter" checked={save} onChange={toggleSave}>{t('keepClosed')}</Checkbox>
+                <HistoryInput
+                    className="mr-4 w-60"
+                    align="left"
+                    inside={true}
+                    value={searchText}
+                    onChange={setSearchText}
+                    onEnter={setSearchText}
+                    placeholder={t('search')}
+                    allowClear
+                    storageKey="connectionSearchHistory"
+                />
+                <Checkbox className="connections-filter ml-0" checked={save} onChange={toggleSave}>{t('keepClosed')}</Checkbox>
                 <Icon className="connections-filter dangerous" onClick={show} type="close-all" size={20} />
             </Header>
             { devices.length > 1 && <Devices devices={devices} selected={device} onChange={handleDeviceSelected} /> }

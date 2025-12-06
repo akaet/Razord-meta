@@ -57,6 +57,7 @@ const CN = {
     Connections: {
         title: '连接',
         keepClosed: '保留关闭连接',
+        search: '搜索 | Regex',
         total: {
             text: '总量',
             upload: '上传',
