@@ -22,6 +22,8 @@ const CN = {
             httpProxyPort: 'HTTP 代理端口',
             mixedProxyPort: '混合代理端口',
             externalController: '外部控制设置',
+            thresholdYellow: '黄色的阈值 (ms)',
+            thresholdRed: '红色的阈值 (ms)',
         },
         values: {
             cn: '中文',

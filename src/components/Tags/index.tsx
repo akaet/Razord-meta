@@ -4,16 +4,9 @@ import { useState, useRef, useLayoutEffect, useMemo } from 'react'
 
 import { noop } from '@lib/helper'
 import { BaseComponentProps } from '@models'
-import { proxyMapping, useI18n } from '@stores'
+import { proxyMapping, useConfig, useI18n } from '@stores'
 
 import './style.scss'
-
-const ProxyColors = {
-    '#909399': 0,
-    '#57b366': 260,
-    '#ff9a28': 600,
-    '#ff3e5e': Infinity,
-}
 
 interface TagsProps extends BaseComponentProps {
     data: string[]
@@ -31,6 +24,15 @@ export function Tags (props: TagsProps) {
     const [expand, setExpand] = useState(false)
     const [showExtend, setShowExtend] = useState(false)
     const [proxyMap] = useAtom(proxyMapping)
+
+    const { data: { thresholdYellow = 300, thresholdRed = 600 } } = useConfig()
+
+    const ProxyColors = useMemo(() => ({
+        '#909399': 0,
+        '#57b366': thresholdYellow,
+        '#ff9a28': thresholdRed,
+        '#ff3e5e': Infinity,
+    }), [thresholdYellow, thresholdRed])
 
     const ulRef = useRef<HTMLUListElement>(null)
     useLayoutEffect(() => {

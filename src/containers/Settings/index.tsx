@@ -7,7 +7,7 @@ import { Header, Card, Switch, ButtonSelect, ButtonSelectOptions, Input } from '
 import { Lang } from '@i18n'
 import { useObject } from '@lib/hook'
 import { jsBridge } from '@lib/jsBridge'
-import { useI18n, useClashXData, useAPIInfo, useGeneral, useVersion, useClient, identityAtom } from '@stores'
+import { useI18n, useClashXData, useAPIInfo, useGeneral, useVersion, useClient, identityAtom, useConfig } from '@stores'
 import './style.scss'
 
 const languageOptions: ButtonSelectOptions[] = [{ label: '中文', value: 'zh_CN' }, { label: 'English', value: 'en_US' }]
@@ -16,6 +16,7 @@ export default function Settings () {
     const { premium } = useVersion()
     const { data: clashXData, update: fetchClashXData } = useClashXData()
     const { general, update: fetchGeneral } = useGeneral()
+    const { data: configData, set: setConfig } = useConfig()
     const setIdentity = useUpdateAtom(identityAtom)
     const apiInfo = useAPIInfo()
     const { translation, setLang, lang } = useI18n()
@@ -26,6 +27,8 @@ export default function Settings () {
         socks5ProxyPort: 7891,
         httpProxyPort: 7890,
         redirProxyPort: 7892,
+        thresholdYellow: 300,
+        thresholdRed: 600,
     })
 
     useEffect(() => {
@@ -33,7 +36,9 @@ export default function Settings () {
         set('httpProxyPort', general?.port ?? 0)
         set('mixedProxyPort', general?.mixedPort ?? 0)
         set('redirProxyPort', general?.redirPort ?? 0)
-    }, [general, set])
+        set('thresholdYellow', configData.thresholdYellow ?? 260)
+        set('thresholdRed', configData.thresholdRed ?? 600)
+    }, [general, configData, set])
 
     async function handleProxyModeChange (mode: string) {
         await client.updateConfig({ mode })
@@ -192,6 +197,28 @@ export default function Settings () {
                             onClick={() => !isClashX && setIdentity(false)}>
                             {`${externalControllerHost}:${externalControllerPort}`}
                         </span>
+                    </div>
+                </div>
+            </Card>
+            <Card className="settings-card">
+                <div className="flex flex-wrap">
+                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.thresholdYellow')}</span>
+                        <Input
+                            className="w-28"
+                            value={info.thresholdYellow}
+                            onChange={thresholdYellow => set('thresholdYellow', +thresholdYellow)}
+                            onBlur={() => setConfig(draft => { draft.thresholdYellow = info.thresholdYellow })}
+                        />
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.thresholdRed')}</span>
+                        <Input
+                            className="w-28"
+                            value={info.thresholdRed}
+                            onChange={thresholdRed => set('thresholdRed', +thresholdRed)}
+                            onBlur={() => setConfig(draft => { draft.thresholdRed = info.thresholdRed })}
+                        />
                     </div>
                 </div>
             </Card>

@@ -22,6 +22,8 @@ const EN = {
             httpProxyPort: 'HTTP proxy port',
             mixedProxyPort: 'Mixed proxy port',
             externalController: 'External controller',
+            thresholdYellow: 'Yellow Threshold (ms)',
+            thresholdRed: 'Red Threshold (ms)',
         },
         values: {
             cn: '中文',

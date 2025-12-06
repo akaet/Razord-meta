@@ -89,6 +89,8 @@ export function useRuleProviders () {
 export const configAtom = atomWithStorage('profile', {
     breakConnections: false,
     logLevel: '',
+    thresholdYellow: 300,
+    thresholdRed: 600,
 })
 
 export function useConfig () {
