@@ -84,6 +84,7 @@ export function Group (props: GroupProps) {
                     select={config.now}
                     canClick={canClick}
                     rowHeight={30}
+                    group={config}
                     fixed={config.fixed} />
             </div>
         </div>
