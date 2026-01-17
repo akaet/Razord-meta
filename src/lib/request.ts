@@ -68,6 +68,7 @@ export interface Proxy {
     type: 'Direct' | 'Reject' | 'Shadowsocks' | 'Vmess' | 'Trojan' | 'Socks' | 'Http' | 'Snell'
     history: History[]
     udp: boolean
+    xudp: boolean
 }
 
 export interface Group {

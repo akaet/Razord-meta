@@ -75,7 +75,7 @@ export function Proxy (props: ProxyProps) {
             <span className="proxy-type" style={{ backgroundColor }}>{config.type}</span>
             <p className="proxy-name">{config.name}</p>
             <p className="proxy-delay" style={{ color }}>{delay === 0 ? '-' : `${delay}ms`}</p>
-            <span className="proxy-udp" >{config.udp.valueOf() ? 'UDP' : null}</span>
+            <span className="proxy-udp" >{config.xudp.valueOf() ? "XUDP" : config.udp.valueOf() ? 'UDP' : null}</span>
         </div>
     )
 }
