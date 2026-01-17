@@ -104,7 +104,7 @@ export default function Settings () {
     return (
         <div className="page">
             <Header title={t('title')} />
-            <Card className="settings-card">
+            <Card className="settings-card md:my-4">
                 <div className="flex flex-wrap">
                     <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between ">
                         <span className="font-bold label">{t('labels.language')}</span>
@@ -127,7 +127,7 @@ export default function Settings () {
                 </div>
             </Card>
             {
-                isClashX && <Card className="settings-card">
+                isClashX && <Card className="settings-card md:my-4">
                     <div className="flex flex-wrap">
                         <div className="flex w-full py-3 px-8 items-center justify-between md:w-1/2">
                             <span className="font-bold label">{t('labels.startAtLogin')}</span>
@@ -141,7 +141,7 @@ export default function Settings () {
                     </div>
                 </Card>
             }
-            <Card className="settings-card">
+            <Card className="settings-card md:my-4">
                 <div className="flex flex-wrap">
                     <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.mixedProxyPort')}</span>
