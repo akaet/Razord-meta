@@ -172,20 +172,21 @@ export class Client {
         return await this.axiosClient.get<{ version: string, premium?: boolean, meta?: boolean }>('version')
     }
 
-    async getProxyDelay (name: string) {
+    async getProxyDelay (name: string, url?: string, timeout?: number) {
         return await this.axiosClient.get<{ delay: number }>(`proxies/${encodeURIComponent(name)}/delay`, {
             params: {
-                timeout: 5000,
-                url: 'http://www.gstatic.com/generate_204',
+                timeout: timeout ?? 5000,
+                url: url ?? 'https://www.gstatic.com/generate_204',
             },
         })
     }
 
-    async getGroupDelay (name: string) {
-        return await this.axiosClient.get<{ delay: number }>(`group/${encodeURIComponent(name)}/delay`, {
+    async getGroupDelay (name: string, url?: string, timeout?: number) {
+        // 组测速API返回每个节点的延迟，格式为 { [nodeName]: delay }
+        return await this.axiosClient.get<Record<string, number>>(`group/${encodeURIComponent(name)}/delay`, {
             params: {
-                timeout: 5000,
-                url: 'http://www.gstatic.com/generate_204',
+                timeout: timeout ?? 5000,
+                url: url ?? 'https://www.gstatic.com/generate_204',
             },
         })
     }

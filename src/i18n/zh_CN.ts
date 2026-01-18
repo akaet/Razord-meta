@@ -22,6 +22,10 @@ const CN = {
             httpProxyPort: 'HTTP 代理端口',
             mixedProxyPort: '混合代理端口',
             externalController: '外部控制设置',
+            speedtestUrl: '测速地址',
+            speedtestTimeout: '测速超时',
+            lowLatency: '黄色阈值',
+            mediumLatency: '红色阈值',
         },
         values: {
             cn: '中文',

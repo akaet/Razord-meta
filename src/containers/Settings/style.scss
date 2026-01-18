@@ -20,6 +20,26 @@
             cursor: pointer;
         }
     }
+
+    // 移动端测速地址输入框样式
+    @media (max-width: 768px) {
+        .settings-speedtest-input {
+            margin-left: 30px !important;
+            max-width: none !important;
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    // 隐藏数值输入框的上下加减按钮
+    input[type="number"] {
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        -moz-appearance: textfield;
+    }
 }
 
 .clash-version {

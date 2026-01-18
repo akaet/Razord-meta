@@ -91,6 +91,19 @@ export const configAtom = atomWithStorage('profile', {
     logLevel: '',
 })
 
+// 测速配置
+export const speedTestConfigAtom = atomWithStorage('speedTestConfig', {
+    speedtestUrl: 'https://www.gstatic.com/generate_204',
+    speedtestTimeout: 5000,
+    lowLatency: 400,
+    mediumLatency: 800,
+})
+
+export function useSpeedTestConfig () {
+    const [config, setConfig] = useAtom(speedTestConfigAtom)
+    return { config, setConfig }
+}
+
 export function useConfig () {
     const [data, set] = useAtom(configAtom)
 

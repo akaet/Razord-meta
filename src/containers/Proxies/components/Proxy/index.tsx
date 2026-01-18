@@ -3,12 +3,11 @@ import classnames from 'classnames'
 import { ResultAsync } from 'neverthrow'
 import { useMemo, useLayoutEffect, useCallback } from 'react'
 
-import { Card } from '@components'
 import EE, { Action } from '@lib/event'
 import { isClashX, jsBridge } from '@lib/jsBridge'
 import { Proxy as IProxy } from '@lib/request'
 import { BaseComponentProps } from '@models'
-import { useClient, useProxy } from '@stores'
+import { useClient, useProxy, useSpeedTestConfig } from '@stores'
 
 import './style.scss'
 
@@ -16,17 +15,11 @@ interface ProxyProps extends BaseComponentProps {
     config: IProxy
 }
 
-const TagColors = {
-    '#909399': 0,
-    '#57b366': 260,
-    '#ff9a28': 600,
-    '#ff3e5e': Infinity,
-}
-
 export function Proxy (props: ProxyProps) {
     const { config, className } = props
     const { set } = useProxy()
     const client = useClient()
+    const { config: speedTestConfig } = useSpeedTestConfig()
 
     const getDelay = useCallback(async (name: string) => {
         if (isClashX()) {
@@ -34,9 +27,13 @@ export function Proxy (props: ProxyProps) {
             return delay
         }
 
-        const { data: { delay } } = await client.getProxyDelay(name)
+        const { data: { delay } } = await client.getProxyDelay(
+            name,
+            speedTestConfig.speedtestUrl,
+            speedTestConfig.speedtestTimeout
+        )
         return delay
-    }, [client])
+    }, [client, speedTestConfig])
 
     const speedTest = useCallback(async function () {
         const result = await ResultAsync.fromPromise(getDelay(config.name), e => e as AxiosError)
@@ -62,12 +59,12 @@ export function Proxy (props: ProxyProps) {
     }, [speedTest])
 
     const hasError = useMemo(() => delay === 0, [delay])
-    const color = useMemo(
-        () => Object.keys(TagColors).find(
-            threshold => delay <= TagColors[threshold as keyof typeof TagColors],
-        ),
-        [delay],
-    )
+    const color = useMemo(() => {
+        if (hasError) return undefined
+        if (delay < speedTestConfig.lowLatency) return '#57b366' // 绿色
+        if (delay < speedTestConfig.mediumLatency) return '#ff9a28' // 黄色
+        return '#ff3e5e' // 红色
+    }, [delay, hasError, speedTestConfig.lowLatency, speedTestConfig.mediumLatency])
 
     const backgroundColor = hasError ? undefined : color
     return (

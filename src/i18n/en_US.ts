@@ -22,6 +22,10 @@ const EN = {
             httpProxyPort: 'HTTP proxy port',
             mixedProxyPort: 'Mixed proxy port',
             externalController: 'External controller',
+            speedtestUrl: 'Speedtest URL',
+            speedtestTimeout: 'Speedtest timeout',
+            lowLatency: 'Yellow threshold',
+            mediumLatency: 'Red threshold',
         },
         values: {
             cn: '中文',

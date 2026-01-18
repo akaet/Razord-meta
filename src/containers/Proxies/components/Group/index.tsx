@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 
 import { Tags, Tag } from '@components'
 import { Group as IGroup, Proxies as IProxy } from '@lib/request'
-import { useProxy, useConfig, proxyMapping, useClient } from '@stores'
+import { useProxy, useConfig, proxyMapping, useClient, useSpeedTestConfig } from '@stores'
 
 import './style.scss'
 
@@ -16,6 +16,7 @@ export function Group (props: GroupProps) {
     const [proxyMap] = useAtom(proxyMapping)
     const { data: Config } = useConfig()
     const client = useClient()
+    const { config: speedTestConfig } = useSpeedTestConfig()
     const { config } = props
 
     async function handleChangeProxySelected (name: string) {
@@ -24,7 +25,11 @@ export function Group (props: GroupProps) {
         // Only URLTest can have fixed nodes. Clicking a fixed node again will unfix it
         if (props.config.type === 'URLTest' && props.config.fixed === name) {
             // Speed test will automatically unfix the node
-            await client.getGroupDelay(props.config.name)
+            await client.getGroupDelay(
+                props.config.name,
+                speedTestConfig.speedtestUrl,
+                speedTestConfig.speedtestTimeout
+            )
             // Trigger remote update to quickly reflect the unfixed result (will update to the lowest latency node)
             await update()
         } else {

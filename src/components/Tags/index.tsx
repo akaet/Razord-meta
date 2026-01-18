@@ -1,6 +1,6 @@
 import classnames from 'classnames'
 import { useAtom } from 'jotai'
-import { useState, useRef, useLayoutEffect } from 'react'
+import { useState, useRef, useLayoutEffect, useCallback } from 'react'
 import dayjs from 'dayjs'
 
 import fixedImg from '@assets/fixed.png'
@@ -8,17 +8,10 @@ import trendImg from '@assets/trend.png'
 import { noop } from '@lib/helper'
 import { Group as IGroup } from '@lib/request'
 import { BaseComponentProps } from '@models'
-import { proxyMapping, useI18n } from '@stores'
+import { proxyMapping, useI18n, useSpeedTestConfig } from '@stores'
 
 import { Tooltip } from '../Tooltip'
 import './style.scss'
-
-const ProxyColors = {
-    '#909399': 0,
-    '#57b366': 260,
-    '#ff9a28': 600,
-    '#ff3e5e': Infinity,
-}
 
 interface TagsProps extends BaseComponentProps {
     data: string[]
@@ -38,6 +31,7 @@ export function Tags (props: TagsProps) {
     const [expand, setExpand] = useState(false)
     const [showExtend, setShowExtend] = useState(false)
     const [proxyMap] = useAtom(proxyMapping)
+    const { config: speedTestConfig } = useSpeedTestConfig()
 
     const ulRef = useRef<HTMLUListElement>(null)
     useLayoutEffect(() => {
@@ -46,6 +40,20 @@ export function Tags (props: TagsProps) {
 
     const rowHeight = expand ? 'auto' : rawHeight
     const handleClick = canClick ? onClick : noop
+
+    // 根据延迟获取颜色
+    const getColorForDelay = useCallback((delay: number) => {
+        if (delay === 0) {
+            return '#909399' // 灰色（无连接）
+        }
+        if (delay < speedTestConfig.lowLatency) {
+            return '#57b366' // 绿色（良好）
+        }
+        if (delay < speedTestConfig.mediumLatency) {
+            return '#ff9a28' // 黄色（中等）
+        }
+        return '#ff3e5e' // 红色（较差）
+    }, [speedTestConfig.lowLatency, speedTestConfig.mediumLatency])
 
     function toggleExtend () {
         setExpand(!expand)
@@ -56,9 +64,7 @@ export function Tags (props: TagsProps) {
             const tagClass = classnames(click, { 'tags-selected': select === t, error: errSet?.has(t) })
             const history = proxyMap.get(t)?.history
             const delay = history?.length ? history.slice(-1)[0].delay : 0
-            const color = Object.keys(ProxyColors).find(
-                threshold => delay <= ProxyColors[threshold as keyof typeof ProxyColors],
-            )
+            const color = getColorForDelay(delay)
             return (
                 <li className={tagClass} key={t} onClick={() => handleClick(t)}>
                     { t === fixed && <img className="proxy-fixed" src={fixedImg} width={11} height={11} alt={''}/> }
@@ -68,9 +74,7 @@ export function Tags (props: TagsProps) {
                             delay={600}
                             content={
                                 history.map((h, i) => {
-                                    const historyColor = Object.keys(ProxyColors).find(
-                                        threshold => h.delay <= ProxyColors[threshold as keyof typeof ProxyColors],
-                                    )
+                                    const historyColor = getColorForDelay(h.delay)
                                     return (
                                         <div key={i}>
                                             {dayjs(h.time).format('YYYY-MM-DD HH:mm:ss')} <span style={{ color: historyColor }}>{h.delay}ms</span>

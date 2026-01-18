@@ -1,13 +1,12 @@
 import classnames from 'classnames'
 import { useUpdateAtom } from 'jotai/utils'
-import { capitalize, camelCase } from 'lodash-es'
-import { useEffect, useMemo } from 'react'
-
+import { capitalize } from 'lodash-es'
+import { useEffect, useMemo, useCallback } from 'react'
 import { Header, Card, Switch, ButtonSelect, ButtonSelectOptions, Input } from '@components'
 import { Lang } from '@i18n'
 import { useObject } from '@lib/hook'
 import { jsBridge } from '@lib/jsBridge'
-import { useI18n, useClashXData, useAPIInfo, useGeneral, useVersion, useClient, identityAtom } from '@stores'
+import { useI18n, useClashXData, useAPIInfo, useGeneral, useVersion, useClient, identityAtom, useSpeedTestConfig } from '@stores'
 import './style.scss'
 
 const languageOptions: ButtonSelectOptions[] = [{ label: '中文', value: 'zh_CN' }, { label: 'English', value: 'en_US' }]
@@ -21,12 +20,18 @@ export default function Settings () {
     const { translation, setLang, lang } = useI18n()
     const { t } = translation('Settings')
     const client = useClient()
+    const { config: speedTestConfig, setConfig: setSpeedTestConfig } = useSpeedTestConfig()
     const [info, set] = useObject({
         mixedProxyPort: 0,
         socks5ProxyPort: 7891,
         httpProxyPort: 7890,
         redirProxyPort: 7892,
     })
+
+    // 更新测速配置的辅助函数
+    const updateSpeedTestConfig = useCallback((updates: Partial<typeof speedTestConfig>) => {
+        setSpeedTestConfig({ ...speedTestConfig, ...updates })
+    }, [speedTestConfig, setSpeedTestConfig])
 
     useEffect(() => {
         set('socks5ProxyPort', general?.socksPort ?? 0)
@@ -106,17 +111,17 @@ export default function Settings () {
             <Header title={t('title')} />
             <Card className="settings-card md:my-4">
                 <div className="flex flex-wrap">
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between ">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between ">
                         <span className="font-bold label">{t('labels.language')}</span>
                         <ButtonSelect options={languageOptions} value={lang} onSelect={(lang) => changeLanguage(lang as Lang)} />
                     </div>
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between ">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between ">
                         <span className="font-bold label">{t('labels.allowConnectFromLan')}</span>
                         <Switch checked={allowLan} onChange={handleAllowLanChange} />
                     </div>
                 </div>
                 <div className="flex flex-wrap">
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between ">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between ">
                         <span className="font-bold label">{t('labels.proxyMode')}</span>
                         <ButtonSelect
                             options={proxyModeOptions}
@@ -129,11 +134,11 @@ export default function Settings () {
             {
                 isClashX && <Card className="settings-card md:my-4">
                     <div className="flex flex-wrap">
-                        <div className="flex w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <div className="flex w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                             <span className="font-bold label">{t('labels.startAtLogin')}</span>
                             <Switch checked={startAtLogin} onChange={handleStartAtLoginChange}/>
                         </div>
-                        <div className="flex w-full py-3 px-8 items-center justify-between md:w-1/2">
+                        <div className="flex w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                             <span className="font-bold label">{t('labels.setAsSystemProxy')}</span>
                             <Switch
                                 checked={systemProxy} onChange={handleSetSystemProxy}/>
@@ -143,7 +148,7 @@ export default function Settings () {
             }
             <Card className="settings-card md:my-4">
                 <div className="flex flex-wrap">
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.mixedProxyPort')}</span>
                         <Input
                             className="w-28"
@@ -153,7 +158,7 @@ export default function Settings () {
                             onBlur={handleMixedPortSave}
                         />
                     </div>
-                    <div className="flex  w-full py-3 px-8 items-center justify-between md:w-1/2">
+                    <div className="flex  w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.redirProxyPort')}</span>
                         <Input
                             className="w-28"
@@ -165,7 +170,7 @@ export default function Settings () {
                     </div>
                 </div>
                 <div className="flex flex-wrap">
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.socks5ProxyPort')}</span>
                         <Input
                             className="w-28"
@@ -175,7 +180,7 @@ export default function Settings () {
                             onBlur={handleSocksPortSave}
                         />
                     </div>
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.httpProxyPort')}</span>
                         <Input
                             className="w-28"
@@ -185,13 +190,62 @@ export default function Settings () {
                             onBlur={handleHttpPortSave}
                         />
                     </div>
-                    <div className="flex flex-wrap w-full py-3 px-8 items-center justify-between md:w-1/2">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
                         <span className="font-bold label">{t('labels.externalController')}</span>
                         <span
                             className={classnames({ 'modify-btn': !isClashX }, 'external-controller')}
                             onClick={() => !isClashX && setIdentity(false)}>
                             {`${externalControllerHost}:${externalControllerPort}`}
                         </span>
+                    </div>
+                </div>
+            </Card>
+            <Card className="settings-card md:my-4">
+                <div className="flex flex-wrap">
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.speedtestUrl')}</span>
+                        <Input
+                            className="flex-1 max-w-xs settings-speedtest-input"
+                            value={speedTestConfig.speedtestUrl}
+                            onChange={url => updateSpeedTestConfig({ speedtestUrl: url })}
+                            placeholder={t('labels.speedtestUrl')}
+                        />
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.speedtestTimeout')}</span>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                className="w-28"
+                                type="number"
+                                value={speedTestConfig.speedtestTimeout}
+                                onChange={timeout => updateSpeedTestConfig({ speedtestTimeout: Number(timeout) || 5000 })}
+                            />
+                            <span className="text-sm text-white">ms</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.lowLatency')}</span>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                className="w-28"
+                                type="number"
+                                value={speedTestConfig.lowLatency}
+                                onChange={latency => updateSpeedTestConfig({ lowLatency: Number(latency) || 400 })}
+                            />
+                            <span className="text-sm text-white">ms</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap w-full py-3 px-3 md:px-8 items-center justify-between md:w-1/2">
+                        <span className="font-bold label">{t('labels.mediumLatency')}</span>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                className="w-28"
+                                type="number"
+                                value={speedTestConfig.mediumLatency}
+                                onChange={latency => updateSpeedTestConfig({ mediumLatency: Number(latency) || 800 })}
+                            />
+                            <span className="text-sm text-white">ms</span>
+                        </div>
                     </div>
                 </div>
             </Card>
