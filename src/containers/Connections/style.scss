@@ -110,9 +110,74 @@
     margin-left: 15px;
     text-shadow: 0 0 6px rgba($color: $color-primary-dark, $alpha: 0.4);
     cursor: pointer;
+}
 
-    &.dangerous {
-        color: $color-red;
-        text-shadow: 0 0 6px rgba($color: $color-primary, $alpha: 0.2);
+.connections-device-select {
+    color: $color-primary-dark;
+    text-shadow: 0 0 6px rgba($color: $color-primary-dark, $alpha: 0.4);
+}
+
+.connections-close-all-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(97, 156, 194, 0.1);
+    border: 1px solid rgba(97, 156, 194, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    outline: none;
+    color: $color-red;
+
+    &:hover {
+        background: rgba(97, 156, 194, 0.15);
+        border-color: rgba(97, 156, 194, 0.3);
+    }
+
+    &:active {
+        background: rgba(97, 156, 194, 0.2);
+    }
+
+    img {
+        width: 14px;
+        height: 14px;
+        display: block;
+    }
+}
+
+.connections-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 200px;
+    margin-left: 15px;
+}
+
+@media (max-width: 768px) {
+    .connections-filter {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .connections-device-select {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .connections-search {
+        flex: none;
+        min-width: 200px;
+        max-width: 200px;
+        width: 200px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .connections-close-all-btn {
+        margin-left: 0;
+        margin-right: 0;
     }
 }

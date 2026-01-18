@@ -66,6 +66,7 @@ const CN = {
         filter: {
             all: '全部',
         },
+        searchPlaceholder: '关键词搜索',
         columns: {
             host: '域名',
             sniffHost: '嗅探域名',

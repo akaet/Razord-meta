@@ -1,5 +1,5 @@
 import classnames from 'classnames'
-import { useRef, useState, useMemo, useLayoutEffect } from 'react'
+import { useRef, useState, useMemo, useLayoutEffect, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Icon } from '@components'
@@ -25,23 +25,32 @@ interface SelectProps<T extends string | number> extends BaseComponentProps {
     options: Array<SelectOptions<T>>
 
     onSelect?: (value: T, e: React.MouseEvent<HTMLLIElement>) => void
+
+    /**
+     * max height of dropdown list
+     * default: 300px
+     */
+    maxHeight?: number | string
 }
 
 export function Select<T extends string | number> (props: SelectProps<T>) {
-    const { value, options, onSelect, className: cn, style } = props
+    const { value, options, onSelect, className: cn, style, maxHeight = 300 } = props
 
     const portalRef = useRef(document.createElement('div'))
     const targetRef = useRef<HTMLDivElement>(null)
+    const listRef = useRef<HTMLDivElement>(null)
 
     const [showDropDownList, setShowDropDownList] = useState(false)
     const [dropdownListStyles, setDropdownListStyles] = useState<React.CSSProperties>({})
+    
     useLayoutEffect(() => {
         const targetRectInfo = targetRef.current!.getBoundingClientRect()
         setDropdownListStyles({
             top: Math.floor(targetRectInfo.top + targetRectInfo.height) + 6,
-            left: Math.floor(targetRectInfo.left) - 10,
+            left: Math.floor(targetRectInfo.left),
+            minWidth: targetRectInfo.width,
         })
-    }, [])
+    }, [showDropDownList])
 
     useLayoutEffect(() => {
         const current = portalRef.current
@@ -50,6 +59,28 @@ export function Select<T extends string | number> (props: SelectProps<T>) {
             document.body.removeChild(current)
         }
     }, [])
+
+    // 点击外部区域关闭下拉列表
+    useEffect(() => {
+        if (!showDropDownList) return
+
+        function handleClickOutside (e: MouseEvent) {
+            const target = e.target as Node
+            if (
+                targetRef.current &&
+                listRef.current &&
+                !targetRef.current.contains(target) &&
+                !listRef.current.contains(target)
+            ) {
+                setShowDropDownList(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [showDropDownList])
 
     function handleShowDropList () {
         setShowDropDownList(!showDropDownList)
@@ -62,10 +93,11 @@ export function Select<T extends string | number> (props: SelectProps<T>) {
 
     const dropDownList = (
         <div
+            ref={listRef}
             className={classnames('select-list', { 'select-list-show': showDropDownList })}
             style={dropdownListStyles}
         >
-            <ul className="list">
+            <ul className="list" style={{ maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }}>
                 {
                     options.map(option => (
                         <Option

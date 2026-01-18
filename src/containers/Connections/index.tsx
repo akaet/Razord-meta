@@ -5,7 +5,8 @@ import produce from 'immer'
 import { groupBy } from 'lodash-es'
 import { useMemo, useRef, useState, useEffect } from 'react'
 
-import { Header, Checkbox, Modal, Icon, Drawer, Card, Button } from '@components'
+import { Header, Checkbox, Modal, Icon, Drawer, Card, Button, Select, SearchInput } from '@components'
+import iconCloseAll from '@assets/icon-close-all.svg'
 import { fromNow } from '@lib/date'
 import { basePath, formatTraffic } from '@lib/helper'
 import { useObject, useVisible } from '@lib/hook'
@@ -13,7 +14,6 @@ import * as API from '@lib/request'
 import { BaseComponentProps } from '@models'
 import { useClient, useI18n } from '@stores'
 
-import { Devices } from './Devices'
 import { ConnectionInfo } from './Info'
 import { Connection, FormatConnection, useConnections } from './store'
 import './style.scss'
@@ -92,6 +92,28 @@ export default function Connections () {
             .sort((a, b) => a.label.localeCompare(b.label))
     }, [connections])
 
+    // search
+    const [searchKeyword, setSearchKeyword] = useState('')
+    const filteredData = useMemo(() => {
+        if (!searchKeyword.trim()) return data
+
+        const keyword = searchKeyword.toLowerCase().trim()
+        return data.filter(item => {
+            return (
+                item.host.toLowerCase().includes(keyword) ||
+                item.sniffHost?.toLowerCase().includes(keyword) ||
+                item.chains.toLowerCase().includes(keyword) ||
+                item.rule.toLowerCase().includes(keyword) ||
+                item.sourceIP.toLowerCase().includes(keyword) ||
+                item.destinationIP?.toLowerCase().includes(keyword)
+            )
+        })
+    }, [data, searchKeyword])
+
+    function handleSearch (keyword: string) {
+        setSearchKeyword(keyword)
+    }
+
     // table
     const pinRef = useRef<HTMLTableCellElement>(null)
     const intersection = useIntersectionObserver(pinRef, { threshold: [1] })
@@ -142,7 +164,7 @@ export default function Connections () {
 
 
     const instance = useTableInstance(table, {
-        data,
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModelSync(),
         getSortedRowModel: getSortedRowModelSync(),
@@ -160,9 +182,18 @@ export default function Connections () {
 
     // filter
     const [device, setDevice] = useState('')
-    function handleDeviceSelected (label: string) {
-        setDevice(label)
-        instance.setColumnFilterValue(Columns.SourceIP, label || undefined)
+    const deviceOptions = useMemo(() => {
+        const allOption = { label: t('filter.all'), value: '' as string }
+        const deviceOptions = devices.map(d => ({
+            label: `${d.label} (${d.number})`,
+            value: d.label,
+        }))
+        return [allOption, ...deviceOptions]
+    }, [devices, t])
+
+    function handleDeviceSelected (value: string) {
+        setDevice(value)
+        instance.setColumnFilterValue(Columns.SourceIP, value || undefined)
     }
 
     // click item
@@ -263,10 +294,28 @@ export default function Connections () {
     return (
         <div className="page !h-100vh">
             <Header title={t('title')}>
+                { devices.length > 1 && (
+                    <Select
+                        className="connections-device-select"
+                        value={device}
+                        options={deviceOptions}
+                        onSelect={handleDeviceSelected}
+                        maxHeight={440}
+                    />
+                ) }
+                <SearchInput
+                    className="connections-search"
+                    placeholder={t('searchPlaceholder')}
+                    onSearch={handleSearch}
+                    onClear={() => handleSearch('')}
+                    storageKey="connections-search-history"
+                    minWidth="200px"
+                />
                 <Checkbox className="connections-filter" checked={save} onChange={toggleSave}>{t('keepClosed')}</Checkbox>
-                <Icon className="connections-filter dangerous" onClick={show} type="close-all" size={20} />
+                <button className="connections-close-all-btn" onClick={show} title={t('closeAll.title')}>
+                    <img src={iconCloseAll} alt="close all" />
+                </button>
             </Header>
-            { devices.length > 1 && <Devices devices={devices} selected={device} onChange={handleDeviceSelected} /> }
             <Card ref={cardRef} className="connections-card relative md:my-4">
                 <div className="overflow-auto min-h-full min-w-full">
                     <table {...instance.getTableProps()}>

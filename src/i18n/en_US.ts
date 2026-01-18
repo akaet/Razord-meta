@@ -66,6 +66,7 @@ const EN = {
         filter: {
             all: 'All',
         },
+        searchPlaceholder: 'Search keywords',
         columns: {
             host: 'Host',
             sniffHost: 'Sniff Host',

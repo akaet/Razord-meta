@@ -6,6 +6,7 @@
     align-items: center;
     justify-content: space-between;
     user-select: none;
+    gap: 10px;
 
     > h1 {
         flex-shrink: 0;
@@ -14,5 +15,26 @@
         font-weight: 500;
         text-shadow: 0 2px 6px rgba($color: $color-primary-dark, $alpha: 0.4);
         line-height: 32px;
+    }
+
+    > div {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        align-items: flex-start;
+
+        > h1 {
+            font-size: 20px;
+        }
+
+        > div {
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
     }
 }
