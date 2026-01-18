@@ -1,5 +1,5 @@
 import produce from 'immer'
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 import * as API from '@lib/request'
 
@@ -31,6 +31,8 @@ class Store {
     protected connections = new Map<string, Connection>()
 
     protected saveDisconnection = false
+
+    protected listeners = new Set<() => void>()
 
     appendToSet (connections: API.Connections[]) {
         const mapping = connections.reduce(
@@ -64,6 +66,8 @@ class Store {
             const n = mapping.get(id)!
             this.connections?.set(id, { ...n, uploadSpeed: n.upload - c.upload, downloadSpeed: n.download - c.download })
         }
+
+        this.notifyListeners()
     }
 
     toggleSave () {
@@ -78,32 +82,53 @@ class Store {
             this.saveDisconnection = true
         }
 
+        this.notifyListeners()
         return this.saveDisconnection
     }
 
     getConnections () {
         return [...this.connections.values()]
     }
+
+    getSaveState () {
+        return this.saveDisconnection
+    }
+
+    subscribe (listener: () => void) {
+        this.listeners.add(listener)
+        return () => {
+            this.listeners.delete(listener)
+        }
+    }
+
+    protected notifyListeners () {
+        this.listeners.forEach(listener => listener())
+    }
 }
 
+// 全局单例 store
+const globalStore = new Store()
+
 export function useConnections () {
-    const store = useMemo(() => new Store(), [])
-    const [connections, setConnections] = useState<Connection[]>([])
-    const [save, setSave] = useState<boolean>(false)
+    const [connections, setConnections] = useState<Connection[]>(globalStore.getConnections())
+    const [save, setSave] = useState<boolean>(globalStore.getSaveState())
+
+    useEffect(() => {
+        const unsubscribe = globalStore.subscribe(() => {
+            setConnections(globalStore.getConnections())
+            setSave(globalStore.getSaveState())
+        })
+        return unsubscribe
+    }, [])
 
     const feed = useCallback(function (connections: API.Connections[]) {
-        store.appendToSet(connections)
-        setConnections(store.getConnections())
-    }, [store])
+        globalStore.appendToSet(connections)
+    }, [])
 
     const toggleSave = useCallback(function () {
-        const state = store.toggleSave()
+        const state = globalStore.toggleSave()
         setSave(state)
-
-        if (!state) {
-            setConnections(store.getConnections())
-        }
-    }, [store])
+    }, [])
 
     return { connections, feed, toggleSave, save }
 }

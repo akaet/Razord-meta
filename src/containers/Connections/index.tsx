@@ -1,9 +1,9 @@
-import { useIntersectionObserver, useSyncedRef, useUnmountEffect } from '@react-hookz/web/esm'
+import { useIntersectionObserver, useSyncedRef } from '@react-hookz/web/esm'
 import { useTableInstance, createTable, getSortedRowModelSync, getColumnFilteredRowModelSync, getCoreRowModelSync } from '@tanstack/react-table'
 import classnames from 'classnames'
 import produce from 'immer'
 import { groupBy } from 'lodash-es'
-import { useMemo, useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 
 import { Header, Checkbox, Modal, Icon, Drawer, Card, Button } from '@components'
 import { fromNow } from '@lib/date'
@@ -11,7 +11,7 @@ import { basePath, formatTraffic } from '@lib/helper'
 import { useObject, useVisible } from '@lib/hook'
 import * as API from '@lib/request'
 import { BaseComponentProps } from '@models'
-import { useClient, useConnectionStreamReader, useI18n } from '@stores'
+import { useClient, useI18n } from '@stores'
 
 import { Devices } from './Devices'
 import { ConnectionInfo } from './Info'
@@ -54,16 +54,8 @@ const table = createTable().setRowType<FormatConnection>()
 export default function Connections () {
     const { translation, lang } = useI18n()
     const t = useMemo(() => translation('Connections').t, [translation])
-    const connStreamReader = useConnectionStreamReader()
-    const readerRef = useSyncedRef(connStreamReader)
     const client = useClient()
     const cardRef = useRef<HTMLDivElement>(null)
-
-    // total
-    const [traffic, setTraffic] = useObject({
-        uploadTotal: 0,
-        downloadTotal: 0,
-    })
 
     // close all connections
     const { visible, show, hide } = useVisible()
@@ -72,7 +64,7 @@ export default function Connections () {
     }
 
     // connections
-    const { connections, feed, save, toggleSave } = useConnections()
+    const { connections, save, toggleSave } = useConnections()
     const data: FormatConnection[] = useMemo(() => connections.map(
         c => ({
             id: c.id,
@@ -148,26 +140,6 @@ export default function Connections () {
         [lang, t],
     )
 
-    useLayoutEffect(() => {
-        function handleConnection (snapshots: API.Snapshot[]) {
-            for (const snapshot of snapshots) {
-                setTraffic({
-                    uploadTotal: snapshot.uploadTotal,
-                    downloadTotal: snapshot.downloadTotal,
-                })
-
-                feed(snapshot.connections)
-            }
-        }
-
-        connStreamReader?.subscribe('data', handleConnection)
-        return () => {
-            connStreamReader?.unsubscribe('data', handleConnection)
-        }
-    }, [connStreamReader, feed, setTraffic])
-    useUnmountEffect(() => {
-        readerRef.current?.destory()
-    })
 
     const instance = useTableInstance(table, {
         data,
@@ -291,9 +263,6 @@ export default function Connections () {
     return (
         <div className="page !h-100vh">
             <Header title={t('title')}>
-                <span className="cursor-default flex-1 connections-filter">
-                    {`(${t('total.text')}: ${t('total.upload')} ${formatTraffic(traffic.uploadTotal)} ${t('total.download')} ${formatTraffic(traffic.downloadTotal)})`}
-                </span>
                 <Checkbox className="connections-filter" checked={save} onChange={toggleSave}>{t('keepClosed')}</Checkbox>
                 <Icon className="connections-filter dangerous" onClick={show} type="close-all" size={20} />
             </Header>

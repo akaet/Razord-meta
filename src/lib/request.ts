@@ -84,6 +84,7 @@ export interface Snapshot {
     uploadTotal: number
     downloadTotal: number
     connections: Connections[]
+    memory: number
 }
 
 export interface Connections {
