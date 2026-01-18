@@ -54,6 +54,7 @@ const CN = {
         providerTitle: '规则集',
         providerUpdateTime: '最后更新于',
         ruleCount: '规则条数',
+        searchPlaceholder: '关键词搜索',
     },
     Connections: {
         title: '连接',

@@ -54,6 +54,7 @@ const EN = {
         providerTitle: 'Providers',
         providerUpdateTime: 'Last updated at',
         ruleCount: 'Rule count',
+        searchPlaceholder: 'Search keywords',
     },
     Connections: {
         title: 'Connections',

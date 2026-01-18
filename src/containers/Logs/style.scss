@@ -27,6 +27,34 @@
     margin-left: 15px;
 }
 
+.logs-pause-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(97, 156, 194, 0.1);
+    border: 1px solid rgba(97, 156, 194, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    outline: none;
+    color: $color-primary-dark;
+    font-size: 14px;
+    line-height: 1;
+
+    &:hover {
+        background: rgba(97, 156, 194, 0.15);
+        border-color: rgba(97, 156, 194, 0.3);
+    }
+
+    &:active {
+        background: rgba(97, 156, 194, 0.2);
+    }
+}
+
 @media (max-width: 768px) {
     .logs-level-select {
         margin-left: 0;
@@ -43,6 +71,11 @@
         min-width: 200px;
         max-width: 200px;
         width: 200px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .logs-pause-btn {
         margin-left: 0;
         margin-right: 0;
     }

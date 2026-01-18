@@ -125,6 +125,14 @@ export function SearchInput (props: SearchInputProps) {
     // 处理删除单条历史记录
     const handleDeleteHistory = (item: string, e: React.MouseEvent) => {
         e.stopPropagation() // 阻止触发item的点击事件
+        e.preventDefault() // 阻止默认行为
+        
+        // 清除可能存在的blur timeout，防止关闭弹窗
+        if (blurTimeoutRef.current !== null) {
+            window.clearTimeout(blurTimeoutRef.current)
+            blurTimeoutRef.current = null
+        }
+        
         const newHistory = history.filter(h => h !== item)
         saveHistory(newHistory)
         

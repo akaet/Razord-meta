@@ -6,6 +6,14 @@
     list-style: none;
     user-select: none;
     border-bottom: 1px solid rgba($color: $color-primary-lightly, $alpha: 0.5);
+    display: flex;
+    align-items: center;
+
+    > div {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
 
     .drag-handler {
         cursor: row-resize;
@@ -22,6 +30,9 @@
     .rule-type {
         font-size: 12px;
         color: $color-primary-darken;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
         > i {
             margin-left: 5px;
@@ -33,11 +44,17 @@
         font-size: 12px;
         color: $color-primary-darken;
         cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .rule-proxy {
         font-size: 12px;
         color: $color-primary-darken;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .delete-btn {
@@ -58,6 +75,38 @@
     &:hover {
         .delete-btn {
             opacity: 1;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .rule-item {
+        padding-left: 12px;
+        padding-right: 12px;
+
+        > div {
+            .rule-type {
+                width: auto !important;
+                flex-shrink: 0; // 不收缩，完整展示内容
+                overflow: visible !important; // 移除截断
+                text-overflow: clip !important; // 移除省略号
+                text-align: left !important;
+            }
+
+            .payload {
+                flex: 1;
+                min-width: 0;
+                text-align: center !important;
+                // 保持省略号效果
+            }
+
+            .rule-proxy {
+                width: auto !important;
+                flex-shrink: 0; // 不收缩，完整展示内容
+                overflow: visible !important; // 移除截断
+                text-overflow: clip !important; // 移除省略号
+                text-align: right !important;
+            }
         }
     }
 }

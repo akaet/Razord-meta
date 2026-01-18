@@ -105,6 +105,16 @@ export default function Logs () {
     const logsStreamReader = useLogsStreamReader()
     const scrollHeightRef = useRef(listRef.current?.scrollHeight ?? 0)
 
+    // 暂停状态
+    const [isPaused, setIsPaused] = useState(false)
+    
+    // 恢复时，将暂停期间接收的日志更新到 UI
+    useEffect(() => {
+        if (!isPaused && logsRef.current.length > 0) {
+            setLogs(logsRef.current)
+        }
+    }, [isPaused])
+
     // 筛选条件
     const [selectedIP, setSelectedIP] = useState<string>('')
     const [searchKeyword, setSearchKeyword] = useState<string>('')
@@ -178,26 +188,39 @@ export default function Logs () {
 
     useLayoutEffect(() => {
         const ul = listRef.current
-        if (ul != null && scrollHeightRef.current === (ul.scrollTop + ul.clientHeight)) {
-            ul.scrollTop = ul.scrollHeight - ul.clientHeight
+        if (ul != null) {
+            // 如果当前在顶部（scrollTop <= 5），有新日志时保持在顶部
+            const wasAtTop = ul.scrollTop <= 5
+            if (wasAtTop) {
+                ul.scrollTop = 0
+            }
         }
         scrollHeightRef.current = ul?.scrollHeight ?? 0
     }, [filteredLogs])
 
     useEffect(() => {
         function handleLog (newLogs: Log[]) {
-            logsRef.current = logsRef.current.slice().concat(newLogs.map(d => ({ ...d, time: d.time || new Date() })))
+            // 新日志添加到数组开头，让最新的在最上面
+            const processedLogs = newLogs.map(d => ({ ...d, time: d.time || new Date() }))
+            logsRef.current = processedLogs.concat(logsRef.current)
+            
+            // 如果暂停，只保存数据不更新 UI
+            if (isPaused) return
+            
+            // 未暂停时更新 UI
             setLogs(logsRef.current)
         }
 
         if (logsStreamReader != null) {
             logsStreamReader.subscribe('data', handleLog)
             // 确保 buffer 中的日志都有有效的 time 属性
-            logsRef.current = logsStreamReader.buffer().map(log => ({ ...log, time: log.time || new Date() }))
+            // buffer 中的日志是旧的在前新的在后，需要反转让最新的在最上面
+            const bufferLogs = logsStreamReader.buffer().map(log => ({ ...log, time: log.time || new Date() }))
+            logsRef.current = bufferLogs.slice().reverse()
             setLogs(logsRef.current)
         }
         return () => logsStreamReader?.unsubscribe('data', handleLog)
-    }, [logsStreamReader])
+    }, [logsStreamReader, isPaused])
 
     return (
         <div className="page">
@@ -223,7 +246,14 @@ export default function Logs () {
                     onSearch={setSearchKeyword}
                     onClear={() => setSearchKeyword('')}
                     storageKey="logs-search-history"
+                    minWidth="200px"
                 />
+                <button 
+                    className="logs-pause-btn" 
+                    onClick={() => setIsPaused(!isPaused)}
+                >
+                    {isPaused ? '▶' : '⏸'}
+                </button>
             </Header>
 
             <Card className="flex flex-col flex-1 mt-2.5 md:mt-4">
