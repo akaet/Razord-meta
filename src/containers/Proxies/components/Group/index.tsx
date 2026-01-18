@@ -12,25 +12,47 @@ interface GroupProps {
 }
 
 export function Group (props: GroupProps) {
-    const { markProxySelected } = useProxy()
+    const { update, markProxySelected } = useProxy()
     const [proxyMap] = useAtom(proxyMapping)
     const { data: Config } = useConfig()
     const client = useClient()
     const { config } = props
 
     async function handleChangeProxySelected (name: string) {
-        await client.changeProxySelected(props.config.name, name)
-        markProxySelected(props.config.name, name)
-        if (Config.breakConnections) {
-            const list: string[] = []
-            const snapshot = await client.getConnections()
-            for (const connection of snapshot.data.connections) {
-                if (connection.chains.includes(props.config.name)) {
-                    list.push(connection.id)
-                }
-            }
+        const oldNow = props.config.now
 
-            await Promise.all(list.map(id => client.closeConnection(id)))
+        // Only URLTest can have fixed nodes. Clicking a fixed node again will unfix it
+        if (props.config.type === 'URLTest' && props.config.fixed === name) {
+            // Speed test will automatically unfix the node
+            await client.getGroupDelay(props.config.name)
+            // Trigger remote update to quickly reflect the unfixed result (will update to the lowest latency node)
+            await update()
+        } else {
+            await client.changeProxySelected(props.config.name, name)
+            markProxySelected(props.config.name, name)
+            // URLTest click: fix the node
+            if (props.config.type === 'URLTest') {
+                // Trigger remote update to quickly reflect the fixed result and display the 🔒 icon accurately
+                await update()
+            }
+        }
+
+        if (Config.breakConnections) {
+            const proxy = await client.getProxy(props.config.name)
+            const newNow = (proxy.data as unknown as IGroup).now
+
+            // After unfixing, the auto-selected node might still be the previously fixed node. If the node hasn't changed, no need to break connections
+            if (oldNow !== newNow) {
+                const list: string[] = []
+                const snapshot = await client.getConnections()
+                for (const connection of snapshot.data.connections) {
+                    if (connection.chains.includes(props.config.name)) {
+                        list.push(connection.id)
+                    }
+                }
+
+                await Promise.all(list.map(id => client.closeConnection(id)))
+            }
         }
     }
 
@@ -46,7 +68,7 @@ export function Group (props: GroupProps) {
         return set
     }, [config.all, proxyMap])
 
-    const canClick = config.type === 'Selector'
+    const canClick = config.type === 'Selector' || config.type === 'URLTest'
     return (
         <div className="proxy-group">
             <div className="flex h-10 mt-4 w-full items-center justify-between md:(h-15 mt-0 w-auto) ">
@@ -61,7 +83,8 @@ export function Group (props: GroupProps) {
                     errSet={errSet}
                     select={config.now}
                     canClick={canClick}
-                    rowHeight={30} />
+                    rowHeight={30}
+                    fixed={config.fixed} />
             </div>
         </div>
     )

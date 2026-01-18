@@ -2,6 +2,7 @@ import classnames from 'classnames'
 import { useAtom } from 'jotai'
 import { useState, useRef, useLayoutEffect, useMemo } from 'react'
 
+import fixedImg from '@assets/fixed.png'
 import { noop } from '@lib/helper'
 import { BaseComponentProps } from '@models'
 import { proxyMapping, useI18n } from '@stores'
@@ -22,10 +23,11 @@ interface TagsProps extends BaseComponentProps {
     select: string
     rowHeight: number
     canClick: boolean
+    fixed?: string
 }
 
 export function Tags (props: TagsProps) {
-    const { className, data, onClick, select, canClick, errSet, rowHeight: rawHeight } = props
+    const { className, data, onClick, select, canClick, errSet, rowHeight: rawHeight, fixed } = props
     const { translation } = useI18n()
     const { t } = translation('Proxies')
     const [expand, setExpand] = useState(false)
@@ -54,7 +56,9 @@ export function Tags (props: TagsProps) {
             )
             return (
                 <li className={tagClass} key={t} onClick={() => handleClick(t)}>
-                    { t } <span className="proxy-delay" style={{ color }}>&emsp;{delay === 0 ? '' : `${delay}ms`}  </span>
+                    { t === fixed && <img className="proxy-fixed" src={fixedImg} width={11} height={11} alt={''}/> }
+                    { t }
+                    { delay !== 0 && (<span className="proxy-delay" style={{color}}>&emsp;{`${delay}ms`}</span>) }
                 </li>
             )
         })

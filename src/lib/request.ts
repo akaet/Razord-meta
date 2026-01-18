@@ -77,6 +77,7 @@ export interface Group {
     now: string
     all: string[]
     history: History[]
+    fixed?: string
 }
 
 export interface Snapshot {
@@ -172,6 +173,15 @@ export class Client {
 
     async getProxyDelay (name: string) {
         return await this.axiosClient.get<{ delay: number }>(`proxies/${encodeURIComponent(name)}/delay`, {
+            params: {
+                timeout: 5000,
+                url: 'http://www.gstatic.com/generate_204',
+            },
+        })
+    }
+
+    async getGroupDelay (name: string) {
+        return await this.axiosClient.get<{ delay: number }>(`group/${encodeURIComponent(name)}/delay`, {
             params: {
                 timeout: 5000,
                 url: 'http://www.gstatic.com/generate_204',
