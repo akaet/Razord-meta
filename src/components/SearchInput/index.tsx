@@ -209,9 +209,9 @@ export function SearchInput (props: SearchInputProps) {
                     style={{ maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }}
                 >
                     <ul className="search-input-history-list">
-                        {history.map((item) => (
+                        {history.map((item, index) => (
                             <li
-                                key={item}
+                                key={`${item}-${index}`}
                                 className="search-input-history-item"
                                 onClick={() => handleHistoryClick(item)}
                             >

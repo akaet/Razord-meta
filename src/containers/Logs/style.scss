@@ -11,3 +11,39 @@
     overflow-y: auto;
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
+
+.logs-level-select {
+    margin-left: 15px;
+}
+
+.logs-filter-select {
+    margin-left: 15px;
+}
+
+.logs-search-input {
+    flex: 1;
+    min-width: 200px;
+    max-width: 200px;
+    margin-left: 15px;
+}
+
+@media (max-width: 768px) {
+    .logs-level-select {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .logs-filter-select {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .logs-search-input {
+        flex: none;
+        min-width: 200px;
+        max-width: 200px;
+        width: 200px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}

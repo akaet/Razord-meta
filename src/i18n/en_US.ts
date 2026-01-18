@@ -44,6 +44,10 @@ const EN = {
     Logs: {
         title: 'Logs',
         levelLabel: 'Log level',
+        filter: {
+            all: 'All',
+        },
+        searchPlaceholder: 'Search keywords',
     },
     Rules: {
         title: 'Rules',

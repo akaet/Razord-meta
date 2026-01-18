@@ -305,6 +305,7 @@ export default function Connections () {
                 ) }
                 <SearchInput
                     className="connections-search"
+                    value={searchKeyword}
                     placeholder={t('searchPlaceholder')}
                     onSearch={handleSearch}
                     onClear={() => handleSearch('')}

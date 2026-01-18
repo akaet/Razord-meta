@@ -44,11 +44,35 @@ export function Select<T extends string | number> (props: SelectProps<T>) {
     const [dropdownListStyles, setDropdownListStyles] = useState<React.CSSProperties>({})
     
     useLayoutEffect(() => {
+        if (!showDropDownList) return
+
         const targetRectInfo = targetRef.current!.getBoundingClientRect()
+        
+        // 初始位置设为左对齐
+        const initialLeft = Math.floor(targetRectInfo.left)
         setDropdownListStyles({
             top: Math.floor(targetRectInfo.top + targetRectInfo.height) + 6,
-            left: Math.floor(targetRectInfo.left),
+            left: initialLeft,
             minWidth: targetRectInfo.width,
+        })
+
+        // 使用 requestAnimationFrame 确保 DOM 已渲染，然后计算是否需要右对齐
+        requestAnimationFrame(() => {
+            if (!listRef.current || !showDropDownList) return
+
+            const listWidth = listRef.current.offsetWidth || listRef.current.scrollWidth
+            const windowWidth = window.innerWidth
+            const leftAlignedRight = initialLeft + listWidth
+
+            // 如果左对齐会超出屏幕，则右对齐
+            const finalLeft = leftAlignedRight <= windowWidth 
+                ? initialLeft 
+                : targetRectInfo.right - listWidth
+
+            setDropdownListStyles(prev => ({
+                ...prev,
+                left: Math.max(0, finalLeft), // 确保不会超出左边界
+            }))
         })
     }, [showDropDownList])
 
