@@ -77,12 +77,12 @@ export function Group (props: GroupProps) {
     return (
         <div className="proxy-group">
             <div className="flex h-10 mt-4 w-full items-center justify-between md:(h-15 mt-0 w-auto) ">
-                <span className="h-6 px-5 w-35 overflow-hidden overflow-ellipsis whitespace-nowrap md:w-30">{ config.name }</span>
-                <Tag className="mr-5 md:mr-0">{ config.type }</Tag>
+                <span className="h-6 px-2.5 md:px-5 w-35 overflow-hidden overflow-ellipsis whitespace-nowrap md:w-30">{ config.name }</span>
+                <Tag className="mr-2.5 md:mr-0">{ config.type }</Tag>
             </div>
             <div className="flex-1 py-2 md:py-4">
                 <Tags
-                    className="ml-5 md:ml-8"
+                    className="ml-2.5 md:ml-8"
                     data={config.all}
                     onClick={handleChangeProxySelected}
                     errSet={errSet}

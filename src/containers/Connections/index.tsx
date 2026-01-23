@@ -292,7 +292,7 @@ export default function Connections () {
     })
 
     return (
-        <div className="page !h-100vh">
+        <div className="page">
             <Header title={t('title')}>
                 { devices.length > 1 && (
                     <Select
@@ -317,7 +317,7 @@ export default function Connections () {
                     <img src={iconCloseAll} alt="close all" />
                 </button>
             </Header>
-            <Card ref={cardRef} className="connections-card relative md:my-4">
+            <Card ref={cardRef} className="connections-card relative md:mt-4">
                 <div className="overflow-auto min-h-full min-w-full">
                     <table {...instance.getTableProps()}>
                         <thead>

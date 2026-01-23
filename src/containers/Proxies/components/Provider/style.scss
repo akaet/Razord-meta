@@ -14,3 +14,9 @@
         box-shadow: 0 0 24px 0 rgba(84, 117, 154, 0.4);
     }
 }
+
+@media (max-width: 768px) {
+    .proxy-provider {
+        padding: 0 10px 10px 10px;
+    }
+}
