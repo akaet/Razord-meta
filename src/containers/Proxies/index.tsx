@@ -45,7 +45,7 @@ function ProxyGroups () {
             <div className="flex flex-col">
                 <Header title={t('groupTitle')}>
                     <Checkbox
-                        className="cursor-pointer text-sm text-shadow-primary text-[#619cc2]"
+                        className="cursor-pointer text-sm text-shadow-primary text-[#619cc2] h-[30px] flex items-center"
                         checked={config.breakConnections}
                         onChange={value => setConfig('breakConnections', value)}>
                         {t('breakConnectionsText')}
