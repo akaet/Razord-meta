@@ -85,3 +85,25 @@ export function useVisible (initial = false) {
     }
     return { visible, hide, show }
 }
+
+export function useDocumentVisibility () {
+    const [visibility, setVisibility] = useState<DocumentVisibilityState>(() => {
+        if (typeof document !== 'undefined') {
+            return document.visibilityState
+        }
+        return 'visible'
+    })
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            setVisibility(document.visibilityState)
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [])
+
+    return visibility
+}
