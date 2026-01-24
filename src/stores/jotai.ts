@@ -6,6 +6,7 @@ import { atomWithImmer } from 'jotai/immer'
 import { atomWithStorage, useUpdateAtom } from 'jotai/utils'
 import { get } from 'lodash-es'
 import { ResultAsync } from 'neverthrow'
+import pLimit from 'p-limit'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import useSWR from 'swr'
 import { Get } from 'type-fest'
@@ -199,6 +200,29 @@ export function useProxy () {
         })
     }, [set])
 
+    const { config: speedTestConfig } = useSpeedTestConfig()
+
+    const speedTest = useCallback(async (proxyName: string) => {
+        const result = await ResultAsync.fromPromise(client.getProxyDelay(
+            proxyName,
+            speedTestConfig.speedtestUrl,
+            speedTestConfig.speedtestTimeout,
+        ), e => e as AxiosError)
+
+        const validDelay = result.isErr() ? 0 : result.value.data.delay
+        set(draft => {
+            const proxy = draft.proxies.find(p => p.name === proxyName)
+            if (proxy != null) {
+                proxy.history.push({ time: new Date().toISOString(), delay: validDelay })
+            }
+        })
+    }, [client, set, speedTestConfig])
+
+    const batchSpeedTest = useCallback(async (proxyNames: string[]) => {
+        const limit = pLimit(5) // Concurrency limit 5
+        await Promise.all(proxyNames.map(name => limit(() => speedTest(name))))
+    }, [speedTest])
+
     return {
         proxies: allProxy.proxies,
         groups: allProxy.groups,
@@ -206,6 +230,7 @@ export function useProxy () {
         update: mutate,
         markProxySelected,
         set,
+        batchSpeedTest,
     }
 }
 

@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 
 import { Card, Header, Icon, Checkbox } from '@components'
-import EE from '@lib/event'
 import { useRound } from '@lib/hook'
 import * as API from '@lib/request'
 import { useI18n, useConfig, useProxy, useProxyProviders, useGeneral } from '@stores'
@@ -96,10 +95,6 @@ function Proxies () {
     const { translation: useTranslation } = useI18n()
     const { t } = useTranslation('Proxies')
 
-    function handleNotitySpeedTest () {
-        EE.notifySpeedTest()
-    }
-
     const { current: sort, next } = useRound(
         [sortType.Asc, sortType.Desc, sortType.None],
     )
@@ -115,14 +110,21 @@ function Proxies () {
     }, [sort, proxies])
     const handleSort = next
 
+    const { batchSpeedTest } = useProxy()
+
+    function handleNotitySpeedTest () {
+        const names = sortedProxies.map(p => p.name)
+        batchSpeedTest(names)
+    }
+
     return <>
         {
             sortedProxies.length !== 0 &&
             <div className="flex flex-col">
                 <Header title={t('title')}>
                     <Icon className="ml-3" type={sortMap[sort]} onClick={handleSort} size={20} />
-                    <Icon className="ml-3" type="speed" size={20} />
-                    <span className="proxies-speed-test text-[#619cc2]" onClick={handleNotitySpeedTest}>{t('speedTestText')}</span>
+                    <Icon className="ml-3 cursor-pointer" type="speed" size={20} onClick={handleNotitySpeedTest} />
+                    <span className="proxies-speed-test text-[#619cc2] cursor-pointer" onClick={handleNotitySpeedTest}>{t('speedTestText')}</span>
                 </Header>
                 <Card className="proxy-provider md:mt-4">
                     <ul className="proxies-list">
