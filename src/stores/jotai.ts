@@ -166,6 +166,8 @@ export const proxies = atomWithImmer({
     } as API.Group,
 })
 
+export const proxiesScrollAtom = atomWithStorage('proxiesScroll', 0)
+
 export function useProxy () {
     const [allProxy, rawSet] = useAtom(proxies)
     const set = useWarpImmerSetter(rawSet)

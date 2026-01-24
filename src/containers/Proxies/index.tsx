@@ -1,9 +1,11 @@
-import { useMemo } from 'react'
+import { useAtom } from 'jotai'
+import { debounce } from 'lodash-es'
+import { useMemo, useLayoutEffect, useEffect, useRef } from 'react'
 
 import { Card, Header, Icon, Checkbox } from '@components'
 import { useRound } from '@lib/hook'
 import * as API from '@lib/request'
-import { useI18n, useConfig, useProxy, useProxyProviders, useGeneral } from '@stores'
+import { useI18n, useConfig, useProxy, useProxyProviders, useGeneral, proxiesScrollAtom } from '@stores'
 
 import { Proxy, Group, Provider } from './components'
 import './style.scss'
@@ -94,6 +96,36 @@ function Proxies () {
     const { proxies } = useProxy()
     const { translation: useTranslation } = useI18n()
     const { t } = useTranslation('Proxies')
+
+    const [scrollTop, setScrollTop] = useAtom(proxiesScrollAtom)
+    const isRestored = useRef(false)
+
+    useLayoutEffect(() => {
+        const container = document.querySelector('.page-container')
+        if (!container) return
+
+        if (!isRestored.current && proxies.length > 0) {
+            if (scrollTop > 0) {
+                container.scrollTop = scrollTop
+            }
+            isRestored.current = true
+        }
+    }, [scrollTop, proxies])
+
+    useEffect(() => {
+        const container = document.querySelector('.page-container')
+        if (!container) return
+
+        const handleScroll = debounce(() => {
+            setScrollTop(container.scrollTop)
+        }, 200)
+
+        container.addEventListener('scroll', handleScroll)
+        return () => {
+            container.removeEventListener('scroll', handleScroll)
+            handleScroll.cancel()
+        }
+    }, [setScrollTop])
 
     const { current: sort, next } = useRound(
         [sortType.Asc, sortType.Desc, sortType.None],
