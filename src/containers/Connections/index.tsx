@@ -317,8 +317,8 @@ export default function Connections () {
                     <img src={iconCloseAll} alt="close all" />
                 </button>
             </Header>
-            <Card ref={cardRef} className="connections-card relative md:mt-4">
-                <div className="overflow-auto min-h-full min-w-full">
+            <Card ref={cardRef} className="connections-card flex flex-col flex-1 relative md:mt-4">
+                <div className="connections-table-container">
                     <table {...instance.getTableProps()}>
                         <thead>
                             <tr {...headerGroup.getHeaderGroupProps()} className="connections-header">
