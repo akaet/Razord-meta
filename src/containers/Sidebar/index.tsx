@@ -1,5 +1,5 @@
 import classnames from 'classnames'
-import { useLayoutEffect, useState, useMemo } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import logo from '@assets/logo.png'
@@ -10,7 +10,7 @@ import iconConnection from '@assets/icon-connection.svg'
 import { Lang, Language } from '@i18n'
 import { formatTraffic } from '@lib/helper'
 import * as API from '@lib/request'
-import { useI18n, useVersion, useClashXData, useConnectionStreamReader } from '@stores'
+import { useI18n, useVersion, useClashXData, useConnectionStreamReader, useTrafficStreamReader } from '@stores'
 import { useConnections } from '@containers/Connections/store'
 import './style.scss'
 
@@ -30,7 +30,8 @@ export default function Sidebar (props: SidebarProps) {
     const { t } = translation('SideBar')
     const location = useLocation()
     const connStreamReader = useConnectionStreamReader()
-    const { connections, feed } = useConnections()
+    const trafficStreamReader = useTrafficStreamReader()
+    const { feed } = useConnections()
 
     const [stats, setStats] = useState({
         uploadTotal: 0,
@@ -39,16 +40,10 @@ export default function Sidebar (props: SidebarProps) {
         connectionCount: 0,
     })
 
-    // 计算所有连接的速度总和
-    const totalSpeed = useMemo(() => {
-        const uploadSpeed = connections
-            .filter(c => !c.completed)
-            .reduce((sum, c) => sum + (c.uploadSpeed || 0), 0)
-        const downloadSpeed = connections
-            .filter(c => !c.completed)
-            .reduce((sum, c) => sum + (c.downloadSpeed || 0), 0)
-        return { uploadSpeed, downloadSpeed }
-    }, [connections])
+    const [speed, setSpeed] = useState({
+        uploadSpeed: 0,
+        downloadSpeed: 0,
+    })
 
     useLayoutEffect(() => {
         function handleConnection (snapshots: API.Snapshot[]) {
@@ -59,7 +54,6 @@ export default function Sidebar (props: SidebarProps) {
                     memory: snapshot.memory,
                     connectionCount: snapshot.connections.length,
                 })
-
                 feed(snapshot.connections)
             }
         }
@@ -69,6 +63,20 @@ export default function Sidebar (props: SidebarProps) {
             connStreamReader?.unsubscribe('data', handleConnection)
         }
     }, [connStreamReader, feed])
+
+    useLayoutEffect(() => {
+        function handleTraffic (data: API.Traffic[]) {
+            const latest = data[data.length - 1]
+            if (latest) {
+                setSpeed({ uploadSpeed: latest.up, downloadSpeed: latest.down })
+            }
+        }
+
+        trafficStreamReader?.subscribe('data', handleTraffic)
+        return () => {
+            trafficStreamReader?.unsubscribe('data', handleTraffic)
+        }
+    }, [trafficStreamReader])
 
     const navlinks = routes.map(
         ({ path, name, noMobile }) => (
@@ -94,7 +102,7 @@ export default function Sidebar (props: SidebarProps) {
                     </div>
                     <div className="sidebar-stats-speed">
                         <span className="sidebar-stats-speed-value">
-                            {totalSpeed.uploadSpeed > 0 ? `↑ ${formatTraffic(totalSpeed.uploadSpeed)}/s` : '-'}
+                            {speed.uploadSpeed > 0 ? `↑ ${formatTraffic(speed.uploadSpeed)}/s` : '-'}
                         </span>
                     </div>
                 </div>
@@ -105,7 +113,7 @@ export default function Sidebar (props: SidebarProps) {
                     </div>
                     <div className="sidebar-stats-speed">
                         <span className="sidebar-stats-speed-value">
-                            {totalSpeed.downloadSpeed > 0 ? `↓ ${formatTraffic(totalSpeed.downloadSpeed)}/s` : '-'}
+                            {speed.downloadSpeed > 0 ? `↓ ${formatTraffic(speed.downloadSpeed)}/s` : '-'}
                         </span>
                     </div>
                 </div>

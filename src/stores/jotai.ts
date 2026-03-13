@@ -15,7 +15,7 @@ import { Language, locales, Lang, getDefaultLanguage } from '@i18n'
 import { partition } from '@lib/helper'
 import { useWarpImmerSetter, WritableDraft } from '@lib/jotai'
 import { isClashX, jsBridge } from '@lib/jsBridge'
-import { Snapshot } from '@lib/request'
+import { Snapshot, Traffic } from '@lib/request'
 import * as API from '@lib/request'
 import { StreamReader } from '@lib/streamer'
 import * as Models from '@models'
@@ -310,6 +310,28 @@ export function useLogsStreamReader () {
             item.connect(logUrl)
         }
     }, [apiInfoRef, item, level, previousKey])
+
+    return item
+}
+
+const trafficStreamReaderAtom = atom(new StreamReader<Traffic>({ bufferLength: 1 }))
+
+export function useTrafficStreamReader () {
+    const apiInfo = useAPIInfo()
+    const item = useAtomValue(trafficStreamReaderAtom)
+
+    const previousKey = usePreviousDistinct(
+        `${apiInfo.protocol}//${apiInfo.hostname}:${apiInfo.port}/traffic?token=${encodeURIComponent(apiInfo.secret)}`,
+    )
+
+    const apiInfoRef = useSyncedRef(apiInfo)
+
+    useEffect(() => {
+        const apiInfo = apiInfoRef.current
+        const protocol = apiInfo.protocol === 'http:' ? 'ws:' : 'wss:'
+        const trafficUrl = `${protocol}//${apiInfo.hostname}:${apiInfo.port}/traffic?token=${encodeURIComponent(apiInfo.secret)}`
+        item.connect(trafficUrl)
+    }, [apiInfoRef, item, previousKey])
 
     return item
 }

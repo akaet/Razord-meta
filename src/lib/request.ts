@@ -87,6 +87,11 @@ export interface Snapshot {
     memory: number
 }
 
+export interface Traffic {
+    up: number
+    down: number
+}
+
 export interface Connections {
     id: string
     metadata: {
