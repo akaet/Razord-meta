@@ -206,7 +206,7 @@ export default function Logs () {
     useEffect(() => {
         function handleLog (newLogs: Log[]) {
             const processedLogs = newLogs.map(d => ({ ...d, time: d.time || new Date() }))
-            logsRef.current = processedLogs.concat(logsRef.current)
+            logsRef.current = processedLogs.concat(logsRef.current).slice(0, 1000)
             if (isPausedRef.current) return
             flushLogs.current()
         }

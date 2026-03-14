@@ -61,7 +61,7 @@ export class StreamReader<T> {
                 this.config.retryInterval * Math.pow(2, this.retryCount),
                 this.maxRetryInterval,
             )
-            this.retryCount++
+            if (delay < this.maxRetryInterval) this.retryCount++
             setTimeout(() => this.connectWebsocket(session), delay)
         })
 

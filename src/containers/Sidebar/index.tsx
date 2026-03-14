@@ -1,5 +1,5 @@
 import classnames from 'classnames'
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useState, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import logo from '@assets/logo.png'
@@ -40,22 +40,20 @@ export default function Sidebar (props: SidebarProps) {
         connectionCount: 0,
     })
 
-    const [speed, setSpeed] = useState({
-        uploadSpeed: 0,
-        downloadSpeed: 0,
-    })
+    const [speed, setSpeed] = useState({ uploadSpeed: 0, downloadSpeed: 0 })
+    const speedRef = useRef(speed)
 
     useLayoutEffect(() => {
         function handleConnection (snapshots: API.Snapshot[]) {
-            for (const snapshot of snapshots) {
-                setStats({
-                    uploadTotal: snapshot.uploadTotal,
-                    downloadTotal: snapshot.downloadTotal,
-                    memory: snapshot.memory,
-                    connectionCount: snapshot.connections.length,
-                })
-                feed(snapshot.connections)
-            }
+            const snapshot = snapshots[snapshots.length - 1]
+            if (!snapshot) return
+            setStats({
+                uploadTotal: snapshot.uploadTotal,
+                downloadTotal: snapshot.downloadTotal,
+                memory: snapshot.memory,
+                connectionCount: snapshot.connections.length,
+            })
+            feed(snapshot.connections)
         }
 
         connStreamReader?.subscribe('data', handleConnection)
@@ -67,8 +65,9 @@ export default function Sidebar (props: SidebarProps) {
     useLayoutEffect(() => {
         function handleTraffic (data: API.Traffic[]) {
             const latest = data[data.length - 1]
-            if (latest) {
-                setSpeed({ uploadSpeed: latest.up, downloadSpeed: latest.down })
+            if (latest && (latest.up !== speedRef.current.uploadSpeed || latest.down !== speedRef.current.downloadSpeed)) {
+                speedRef.current = { uploadSpeed: latest.up, downloadSpeed: latest.down }
+                setSpeed(speedRef.current)
             }
         }
 
