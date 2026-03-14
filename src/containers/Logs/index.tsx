@@ -1,6 +1,8 @@
 import dayjs from 'dayjs'
 import { camelCase } from 'lodash-es'
 import { useLayoutEffect, useEffect, useRef, useState, useMemo } from 'react'
+import AutoSizer from 'react-virtualized-auto-sizer'
+import { FixedSizeList as List } from 'react-window'
 
 import { Select, Card, Header, SearchInput } from '@components'
 import { Log } from '@models/Log'
@@ -96,14 +98,14 @@ function extractSourceIP (payload: string): string | undefined {
 }
 
 export default function Logs () {
-    const listRef = useRef<HTMLUListElement>(null)
+    const listRef = useRef<List>(null)
+    const listOuterRef = useRef<HTMLDivElement>(null)
     const logsRef = useRef<Log[]>([])
     const [logs, setLogs] = useState<Log[]>([])
     const { translation } = useI18n()
     const { data: { logLevel }, set: setConfig } = useConfig()
     const { t } = translation('Logs')
     const logsStreamReader = useLogsStreamReader()
-    const scrollHeightRef = useRef(listRef.current?.scrollHeight ?? 0)
 
     // 暂停状态
     const [isPaused, setIsPaused] = useState(false)
@@ -187,15 +189,10 @@ export default function Logs () {
     }, [logs, selectedIP, searchKeyword, getParsedLogInfo])
 
     useLayoutEffect(() => {
-        const ul = listRef.current
-        if (ul != null) {
-            // 如果当前在顶部（scrollTop <= 5），有新日志时保持在顶部
-            const wasAtTop = ul.scrollTop <= 5
-            if (wasAtTop) {
-                ul.scrollTop = 0
-            }
+        const el = listOuterRef.current
+        if (el != null && el.scrollTop <= 5) {
+            listRef.current?.scrollToItem(0)
         }
-        scrollHeightRef.current = ul?.scrollHeight ?? 0
     }, [filteredLogs])
 
     useEffect(() => {
@@ -257,24 +254,38 @@ export default function Logs () {
             </Header>
 
             <Card className="flex flex-col flex-1 mt-2.5 md:mt-4">
-                <ul className="logs-panel" ref={listRef}>
-                    {
-                        filteredLogs.map((log, index) => {
-                            const logTime = log.time || new Date()
-                            const payload = log.payload || ''
-                            const logType = log.type || 'unknown'
-                            const logKey = `${logTime.getTime()}-${payload.substring(0, 50)}-${index}`
-                            
-                            return (
-                                <li className="leading-5 inline-block" key={logKey}>
-                                    <span className="mr-2 text-orange-400">[{ dayjs(logTime).format('YYYY-MM-DD HH:mm:ss') }]</span>
-                                    <span className={logMap.get(logType) || ''}>[{ logType.toUpperCase() }]</span>
-                                    <span> { payload }</span>
-                                </li>
+                <div className="logs-panel">
+                    <AutoSizer>
+                        {
+                            ({ height, width }) => (
+                                <List
+                                    ref={listRef}
+                                    outerRef={listOuterRef}
+                                    height={height}
+                                    width={width}
+                                    itemCount={filteredLogs.length}
+                                    itemSize={20}
+                                >
+                                    {
+                                        ({ index, style }) => {
+                                            const log = filteredLogs[index]
+                                            const logTime = log.time || new Date()
+                                            const payload = log.payload || ''
+                                            const logType = log.type || 'unknown'
+                                            return (
+                                                <li className="leading-5 inline-block" style={style}>
+                                                    <span className="mr-2 text-orange-400">[{ dayjs(logTime).format('YYYY-MM-DD HH:mm:ss') }]</span>
+                                                    <span className={logMap.get(logType) || ''}>[{ logType.toUpperCase() }]</span>
+                                                    <span> { payload }</span>
+                                                </li>
+                                            )
+                                        }
+                                    }
+                                </List>
                             )
-                        })
-                    }
-                </ul>
+                        }
+                    </AutoSizer>
+                </div>
             </Card>
         </div>
     )
