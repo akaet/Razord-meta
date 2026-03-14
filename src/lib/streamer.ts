@@ -17,21 +17,34 @@ export class StreamReader<T> {
 
     protected connection: WebSocket | null = null
 
+    protected sessionId = 0
+
+    protected retryCount = 0
+
+    protected readonly maxRetryInterval = 30000
+
     constructor (config: Config) {
         this.config = Object.assign(
             {
                 bufferLength: 0,
-                retryInterval: 5000,
+                retryInterval: 3000,
             },
             config,
         )
     }
 
-    protected connectWebsocket () {
-        const url = new URL(this.url)
+    protected connectWebsocket (session: number) {
+        if (session !== this.sessionId) return
 
+        const url = new URL(this.url)
         this.connection = new WebSocket(url.toString())
+
+        this.connection.addEventListener('open', () => {
+            this.retryCount = 0
+        })
+
         this.connection.addEventListener('message', msg => {
+            if (session !== this.sessionId) return
             const data = JSON.parse(msg.data)
             this.EE.emit('data', [data])
             if (this.config.bufferLength > 0) {
@@ -42,10 +55,19 @@ export class StreamReader<T> {
             }
         })
 
+        this.connection.addEventListener('close', () => {
+            if (session !== this.sessionId) return
+            const delay = Math.min(
+                this.config.retryInterval * Math.pow(2, this.retryCount),
+                this.maxRetryInterval,
+            )
+            this.retryCount++
+            setTimeout(() => this.connectWebsocket(session), delay)
+        })
+
         this.connection.addEventListener('error', err => {
             this.EE.emit('error', err)
             this.connection?.close()
-            setTimeout(this.connectWebsocket, this.config.retryInterval)
         })
     }
 
@@ -54,8 +76,10 @@ export class StreamReader<T> {
             return
         }
         this.url = url
+        this.sessionId++
+        this.retryCount = 0
         this.connection?.close()
-        this.connectWebsocket()
+        this.connectWebsocket(this.sessionId)
     }
 
     subscribe (event: string, callback: (data: T[]) => void) {
@@ -71,6 +95,7 @@ export class StreamReader<T> {
     }
 
     destory () {
+        this.sessionId++
         this.EE.removeAllListeners()
         this.connection?.close()
         this.connection = null

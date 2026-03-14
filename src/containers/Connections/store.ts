@@ -30,6 +30,8 @@ export interface FormatConnection {
 class Store {
     protected connections = new Map<string, Connection>()
 
+    protected previousSnapshot = new Map<string, API.Connections>()
+
     protected saveDisconnection = false
 
     protected listeners = new Set<() => void>()
@@ -56,17 +58,16 @@ class Store {
             }
         }
 
-        for (const id of mapping.keys()) {
-            if (!this.connections.has(id)) {
-                this.connections.set(id, { ...mapping.get(id)!, uploadSpeed: 0, downloadSpeed: 0 })
-                continue
-            }
-
-            const c = this.connections.get(id)!
-            const n = mapping.get(id)!
-            this.connections?.set(id, { ...n, uploadSpeed: n.upload - c.upload, downloadSpeed: n.download - c.download })
+        for (const [id, n] of mapping.entries()) {
+            const prev = this.previousSnapshot.get(id)
+            this.connections.set(id, {
+                ...n,
+                uploadSpeed: prev ? n.upload - prev.upload : 0,
+                downloadSpeed: prev ? n.download - prev.download : 0,
+            })
         }
 
+        this.previousSnapshot = mapping
         this.notifyListeners()
     }
 

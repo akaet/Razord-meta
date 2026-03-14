@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { camelCase } from 'lodash-es'
+import { camelCase, throttle } from 'lodash-es'
 import { useLayoutEffect, useEffect, useRef, useState, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { FixedSizeList as List } from 'react-window'
@@ -109,12 +109,20 @@ export default function Logs () {
 
     // 暂停状态
     const [isPaused, setIsPaused] = useState(false)
-    
+    const isPausedRef = useRef(isPaused)
+    isPausedRef.current = isPaused
+
+    const flushLogs = useRef(throttle(() => setLogs(logsRef.current), 500))
+    useEffect(() => () => flushLogs.current.cancel(), [])
+
     // 恢复时，将暂停期间接收的日志更新到 UI
+    const wasPausedRef = useRef(false)
     useEffect(() => {
-        if (!isPaused && logsRef.current.length > 0) {
+        if (!isPaused && wasPausedRef.current && logsRef.current.length > 0) {
+            flushLogs.current.cancel()
             setLogs(logsRef.current)
         }
+        wasPausedRef.current = isPaused
     }, [isPaused])
 
     // 筛选条件
@@ -197,27 +205,21 @@ export default function Logs () {
 
     useEffect(() => {
         function handleLog (newLogs: Log[]) {
-            // 新日志添加到数组开头，让最新的在最上面
             const processedLogs = newLogs.map(d => ({ ...d, time: d.time || new Date() }))
             logsRef.current = processedLogs.concat(logsRef.current)
-            
-            // 如果暂停，只保存数据不更新 UI
-            if (isPaused) return
-            
-            // 未暂停时更新 UI
-            setLogs(logsRef.current)
+            if (isPausedRef.current) return
+            flushLogs.current()
         }
 
         if (logsStreamReader != null) {
             logsStreamReader.subscribe('data', handleLog)
-            // 确保 buffer 中的日志都有有效的 time 属性
             // buffer 中的日志是旧的在前新的在后，需要反转让最新的在最上面
             const bufferLogs = logsStreamReader.buffer().map(log => ({ ...log, time: log.time || new Date() }))
             logsRef.current = bufferLogs.slice().reverse()
             setLogs(logsRef.current)
         }
         return () => logsStreamReader?.unsubscribe('data', handleLog)
-    }, [logsStreamReader, isPaused])
+    }, [logsStreamReader])
 
     return (
         <div className="page">
