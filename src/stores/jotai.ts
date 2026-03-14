@@ -221,9 +221,10 @@ export function useProxy () {
     }, [client, set, speedTestConfig])
 
     const batchSpeedTest = useCallback(async (proxyNames: string[]) => {
-        const limit = pLimit(5) // Concurrency limit 5
-        await Promise.all(proxyNames.map(name => limit(() => speedTest(name))))
-    }, [speedTest])
+        const limit = pLimit(5)
+        await Promise.allSettled(proxyNames.map(name => limit(() => speedTest(name))))
+        await mutate()
+    }, [speedTest, mutate])
 
     return {
         proxies: allProxy.proxies,
