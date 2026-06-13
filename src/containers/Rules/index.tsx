@@ -1,7 +1,7 @@
-import AutoSizer from 'react-virtualized-auto-sizer'
-import { FixedSizeList as List } from 'react-window'
-import useSWR from 'swr'
 import { useState, useMemo } from 'react'
+import AutoSizer from 'react-virtualized-auto-sizer'
+import { VariableSizeList as List } from 'react-window'
+import useSWR from 'swr'
 
 import { Header, Card, SearchInput } from '@components'
 import { useI18n, useRule, useRuleProviders } from '@stores'
@@ -9,30 +9,9 @@ import { useI18n, useRule, useRuleProviders } from '@stores'
 import { Provider } from './Provider'
 import './style.scss'
 
-function RuleProviders () {
-    const { providers } = useRuleProviders()
-    const { translation } = useI18n()
-    const { t } = translation('Rules')
-
-    return <>
-        {
-            providers.length !== 0 &&
-            <div className="flex flex-col">
-                <Header title={t('providerTitle')} />
-                <Card className="divide-y rounded shadow-primary mt-4 p-0">
-                    {
-                        providers.map(p => (
-                            <Provider key={p.name} provider={p} />
-                        ))
-                    }
-                </Card>
-            </div>
-        }
-    </>
-}
-
 export default function Rules () {
     const { rules, update } = useRule()
+    const { providers } = useRuleProviders()
     const { translation } = useI18n()
     const { t } = translation('Rules')
 
@@ -57,15 +36,30 @@ export default function Rules () {
         setSearchKeyword(keyword)
     }
 
-    function renderRuleItem ({ index, style }: { index: number, style: React.CSSProperties }) {
-        const rule = filteredRules[index]
+    const providerCount = providers.length
+    const itemCount = providerCount + filteredRules.length
+
+    const getItemSize = (index: number) => {
+        if (index < providerCount) return window.innerWidth <= 768 ? 100 : 50
+        return 40
+    }
+
+    function renderItem ({ index, style }: { index: number, style: React.CSSProperties }) {
+        if (index < providerCount) {
+            return (
+                <div style={style}>
+                    <Provider provider={providers[index]} />
+                </div>
+            )
+        }
+        const rule = filteredRules[index - providerCount]
         const ruleSize = rule.size || -1
         return (
             <li className="rule-item" style={style}>
                 <div className="flex py-1">
-                    <div className="text-center w-40 rule-type">{ rule.type }</div>
+                    <div className="text-left w-40 rule-type">{ rule.type }</div>
                     <div className="flex-1 text-center payload"> { ruleSize !== -1 ? `${rule.payload} :: ${ruleSize}` : rule.payload }</div>
-                    <div className="text-center w-40 rule-proxy">{ rule.proxy }</div>
+                    <div className="text-right w-40 rule-proxy">{ rule.proxy }</div>
                 </div>
             </li>
         )
@@ -73,8 +67,7 @@ export default function Rules () {
 
     return (
         <div className="page">
-            <RuleProviders />
-            <Header className="not-first:mt-7.5" title={t('title')}>
+            <Header title={t('title')}>
                 <SearchInput
                     className="rules-search"
                     value={searchKeyword}
@@ -92,10 +85,10 @@ export default function Rules () {
                             <List
                                 height={height}
                                 width={width}
-                                itemCount={filteredRules.length}
-                                itemSize={40}
+                                itemCount={itemCount}
+                                itemSize={getItemSize}
                             >
-                                { renderRuleItem }
+                                { renderItem }
                             </List>
                         )
                     }

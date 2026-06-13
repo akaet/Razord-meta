@@ -2,9 +2,13 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    font-size: 16px;
-    padding: 20px;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    font-size: 12px;
+    padding: 0 12px;
     color: #b7c5d6;
+    border-bottom: 0.3px solid rgba($color: $color-primary-lightly, $alpha: 0.5);
 }
 
 .rule-provider-header {
@@ -19,18 +23,16 @@
 }
 
 .rule-provider-name {
-    width: 120px;
-    margin-right: 6px;
+    // width: 120px;
+    margin-right: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .rule-provider-behavior {
-    width: 80px;
-    margin: 0 0 0 12px;
-    background-color: $color-primary-dark;
-    color: #fff;
+    // width: 80px;
+    margin: 0 12px 0 12px;
 }
 
 .rule-provider-expire {
@@ -55,7 +57,7 @@
 
 .rule-provider-update {
     line-height: 14px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .rule-provider-icon {
@@ -77,6 +79,8 @@
     }
 
     .rule-provider-header-part {
-        margin: 6px 0;
+        margin: 4px 0;
+        flex-wrap: wrap;
+        gap: 4px;
     }
 }

@@ -117,6 +117,15 @@ export default function Logs () {
 
     // 恢复时，将暂停期间接收的日志更新到 UI
     const wasPausedRef = useRef(false)
+
+    // 允许日志内容横向滚动
+    useEffect(() => {
+        const el = listOuterRef.current
+        if (el) {
+            el.style.overflowX = 'auto'
+            el.style.overflowY = 'hidden'
+        }
+    }, [])
     useEffect(() => {
         if (!isPaused && wasPausedRef.current && logsRef.current.length > 0) {
             flushLogs.current.cancel()
@@ -275,7 +284,7 @@ export default function Logs () {
                                             const payload = log.payload || ''
                                             const logType = log.type || 'unknown'
                                             return (
-                                                <li className="leading-5 inline-block" style={style}>
+                                                <li className="leading-5 whitespace-nowrap" style={{ ...style, width: 'max-content', minWidth: '100%' }}>
                                                     <span className="mr-2 text-orange-400">[{ dayjs(logTime).format('YYYY-MM-DD HH:mm:ss') }]</span>
                                                     <span className={logMap.get(logType) || ''}>[{ logType.toUpperCase() }]</span>
                                                     <span> { payload }</span>
