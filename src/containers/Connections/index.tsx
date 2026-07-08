@@ -78,7 +78,9 @@ export default function Connections () {
             sourceIP: c.metadata.sourceIP,
             destinationIP: `${c.metadata.remoteDestination || c.metadata.destinationIP || c.metadata.host}`,
             type: c.metadata.type,
-            network: c.metadata.network.toUpperCase(),
+            network: c.metadata.network === 'udp' && (c.metadata.destinationPort === '443' || c.metadata.sniffHost)
+                ? 'QUIC'
+                : c.metadata.network.toUpperCase(),
             process: c.metadata.processPath,
             speed: { upload: c.uploadSpeed, download: c.downloadSpeed },
             completed: !!c.completed,
