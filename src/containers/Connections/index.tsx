@@ -5,12 +5,11 @@ import produce from 'immer'
 import { groupBy } from 'lodash-es'
 import { useMemo, useRef, useState, useEffect } from 'react'
 
-import { Header, Checkbox, Modal, Icon, Drawer, Card, Button, Select, SearchInput } from '@components'
 import iconCloseAll from '@assets/icon-close-all.svg'
+import { Header, Checkbox, Modal, Icon, Drawer, Card, Button, Select, SearchInput } from '@components'
 import { fromNow } from '@lib/date'
 import { basePath, formatTraffic } from '@lib/helper'
 import { useObject, useVisible } from '@lib/hook'
-import * as API from '@lib/request'
 import { BaseComponentProps } from '@models'
 import { useClient, useI18n } from '@stores'
 
@@ -120,7 +119,7 @@ export default function Connections () {
     const pinRef = useRef<HTMLTableCellElement>(null)
     const intersection = useIntersectionObserver(pinRef, { threshold: [1] })
     const columns = useMemo(
-        () => table.createColumns([
+        () => [
             table.createDataColumn(Columns.Host, { minSize: 220, size: 220, header: t(`columns.${Columns.Host}`) }),
             table.createDataColumn(Columns.Rule, { minSize: 220, size: 220, header: t(`columns.${Columns.Rule}`) }),
             table.createDataColumn(Columns.Chains, { minSize: 260, size: 260, header: t(`columns.${Columns.Chains}`) }),
@@ -134,7 +133,7 @@ export default function Connections () {
                     minSize: 200,
                     size: 200,
                     sortDescFirst: true,
-                    sortingFn (rowA, rowB) {
+                    sortingFn: (rowA: any, rowB: any) => {
                         const speedA = rowA.original?.speed ?? { upload: 0, download: 0 }
                         const speedB = rowB.original?.speed ?? { upload: 0, download: 0 }
                         return speedA.download === speedB.download
@@ -153,17 +152,16 @@ export default function Connections () {
                     size: 120,
                     header: t(`columns.${Columns.Time}`),
                     cell: cell => fromNow(new Date(cell.value), lang),
-                    sortingFn: (rowA, rowB) => (rowB.original?.time ?? 0) - (rowA.original?.time ?? 0),
+                    sortingFn: (rowA: any, rowB: any) => (rowB.original?.time ?? 0) - (rowA.original?.time ?? 0),
                 },
             ),
             table.createDataColumn(Columns.Network, { minSize: 80, size: 80, header: t(`columns.${Columns.Network}`) }),
             table.createDataColumn(Columns.Type, { minSize: 100, size: 100, header: t(`columns.${Columns.Type}`) }),
             table.createDataColumn(Columns.Process, { minSize: 100, size: 100, header: t(`columns.${Columns.Process}`), cell: cell => cell.value ? basePath(cell.value) : '-' }),
             table.createDataColumn(Columns.SniffHost, { minSize: 260, size: 200, header: t(`columns.${Columns.SniffHost}`) }),
-        ]),
+        ],
         [lang, t],
     )
-
 
     const instance = useTableInstance(table, {
         data: filteredData,
