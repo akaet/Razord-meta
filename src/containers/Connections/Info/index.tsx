@@ -24,7 +24,11 @@ export function ConnectionInfo (props: ConnectionsInfoProps) {
             <div className="flex my-3 justify-between">
                 <div className="flex flex-1">
                     <span className="font-bold w-20">{t('info.network')}</span>
-                    <span className="font-mono">{props.connection.metadata?.network}</span>
+                    <span className="font-mono">{
+                        props.connection.metadata?.network === 'udp' && (props.connection.metadata?.destinationPort === '443' || props.connection.metadata?.sniffHost)
+                            ? 'QUIC'
+                            : props.connection.metadata?.network?.toUpperCase()
+                    }</span>
                 </div>
                 <div className="flex flex-1">
                     <span className="font-bold w-20">{t('info.inbound')}</span>
