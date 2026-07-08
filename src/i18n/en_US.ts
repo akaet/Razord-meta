@@ -79,8 +79,7 @@ const EN = {
         columns: {
             host: 'Host',
             sniffHost: 'Sniff Host',
-            network: 'Network',
-            type: 'Type',
+            type: 'Type / Network',
             chains: 'Chains',
             process: 'Process',
             rule: 'Rule',

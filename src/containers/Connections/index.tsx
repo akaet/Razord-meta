@@ -20,7 +20,6 @@ import './style.scss'
 const Columns = {
     Host: 'host',
     SniffHost: 'sniffHost',
-    Network: 'network',
     Process: 'process',
     Type: 'type',
     Chains: 'chains',
@@ -33,7 +32,7 @@ const Columns = {
     Time: 'time',
 } as const
 
-const shouldCenter = new Set<string>([Columns.Network, Columns.Type, Columns.Speed, Columns.Upload, Columns.Download, Columns.SourceIP, Columns.Time, Columns.Process])
+const shouldCenter = new Set<string>([Columns.Type, Columns.Speed, Columns.Upload, Columns.Download, Columns.SourceIP, Columns.Time, Columns.Process])
 
 function formatSpeed (upload: number, download: number) {
     switch (true) {
@@ -76,10 +75,7 @@ export default function Connections () {
             download: c.download,
             sourceIP: c.metadata.sourceIP,
             destinationIP: `${c.metadata.remoteDestination || c.metadata.destinationIP || c.metadata.host}`,
-            type: c.metadata.type,
-            network: c.metadata.network === 'udp' && (c.metadata.destinationPort === '443' || c.metadata.sniffHost)
-                ? 'QUIC'
-                : c.metadata.network.toUpperCase(),
+            typeNetwork: `${c.metadata.type} | ${c.metadata.network === 'udp' && (c.metadata.destinationPort === '443' || c.metadata.sniffHost) ? 'QUIC' : c.metadata.network.toUpperCase()}`,
             process: c.metadata.processPath,
             speed: { upload: c.uploadSpeed, download: c.downloadSpeed },
             completed: !!c.completed,
@@ -124,7 +120,14 @@ export default function Connections () {
             table.createDataColumn(Columns.Rule, { minSize: 220, size: 220, header: t(`columns.${Columns.Rule}`) }),
             table.createDataColumn(Columns.Chains, { minSize: 260, size: 260, header: t(`columns.${Columns.Chains}`) }),
             table.createDataColumn(Columns.SourceIP, { minSize: 140, size: 140, header: t(`columns.${Columns.SourceIP}`), filterFn: 'equals' }),
-            table.createDataColumn(Columns.DestinationIP, { minSize: 140, size: 140, header: t(`columns.${Columns.DestinationIP}`) }),
+            table.createDataColumn(row => row.typeNetwork, {
+                id: Columns.Type,
+                minSize: 140,
+                size: 140,
+                header: t(`columns.${Columns.Type}`),
+            }),
+            table.createDataColumn(Columns.Upload, { minSize: 100, size: 100, header: t(`columns.${Columns.Upload}`), cell: cell => formatTraffic(cell.value) }),
+            table.createDataColumn(Columns.Download, { minSize: 100, size: 100, header: t(`columns.${Columns.Download}`), cell: cell => formatTraffic(cell.value) }),
             table.createDataColumn(
                 row => [row.speed.upload, row.speed.download],
                 {
@@ -143,8 +146,6 @@ export default function Connections () {
                     cell: cell => formatSpeed(cell.value[0], cell.value[1]),
                 },
             ),
-            table.createDataColumn(Columns.Upload, { minSize: 100, size: 100, header: t(`columns.${Columns.Upload}`), cell: cell => formatTraffic(cell.value) }),
-            table.createDataColumn(Columns.Download, { minSize: 100, size: 100, header: t(`columns.${Columns.Download}`), cell: cell => formatTraffic(cell.value) }),
             table.createDataColumn(
                 Columns.Time,
                 {
@@ -155,10 +156,9 @@ export default function Connections () {
                     sortingFn: (rowA: any, rowB: any) => (rowB.original?.time ?? 0) - (rowA.original?.time ?? 0),
                 },
             ),
-            table.createDataColumn(Columns.Network, { minSize: 80, size: 80, header: t(`columns.${Columns.Network}`) }),
-            table.createDataColumn(Columns.Type, { minSize: 100, size: 100, header: t(`columns.${Columns.Type}`) }),
+            table.createDataColumn(Columns.DestinationIP, { minSize: 220, size: 220, header: t(`columns.${Columns.DestinationIP}`) }),
+            table.createDataColumn(Columns.SniffHost, { minSize: 220, size: 220, header: t(`columns.${Columns.SniffHost}`) }),
             table.createDataColumn(Columns.Process, { minSize: 100, size: 100, header: t(`columns.${Columns.Process}`), cell: cell => cell.value ? basePath(cell.value) : '-' }),
-            table.createDataColumn(Columns.SniffHost, { minSize: 260, size: 200, header: t(`columns.${Columns.SniffHost}`) }),
         ],
         [lang, t],
     )
