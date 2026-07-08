@@ -108,6 +108,7 @@ export function SearchInput (props: SearchInputProps) {
     // 处理输入变化
     const handleChange = (newValue: string) => {
         setKeyword(newValue)
+        onSearch?.(newValue)
     }
 
     // 处理清除

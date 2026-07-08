@@ -102,7 +102,8 @@ export default function Connections () {
                 item.chains.toLowerCase().includes(keyword) ||
                 item.rule.toLowerCase().includes(keyword) ||
                 item.sourceIP.toLowerCase().includes(keyword) ||
-                item.destinationIP?.toLowerCase().includes(keyword)
+                item.destinationIP?.toLowerCase().includes(keyword) ||
+                item.typeNetwork.toLowerCase().includes(keyword)
             )
         })
     }, [data, searchKeyword])
