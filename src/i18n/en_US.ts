@@ -84,6 +84,8 @@ const EN = {
             process: 'Process',
             rule: 'Rule',
             time: 'Time',
+            ulSpeed: 'UL Speed',
+            dlSpeed: 'DL Speed',
             speed: 'Speed',
             upload: 'Upload',
             download: 'Download',

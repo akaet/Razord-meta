@@ -27,25 +27,14 @@ const Columns = {
     Speed: 'speed',
     Upload: 'upload',
     Download: 'download',
+    UlSpeed: 'ulSpeed',
+    DlSpeed: 'dlSpeed',
     SourceIP: 'sourceIP',
     DestinationIP: 'destinationIP',
     Time: 'time',
 } as const
 
-const shouldCenter = new Set<string>([Columns.Type, Columns.Speed, Columns.Upload, Columns.Download, Columns.SourceIP, Columns.Time, Columns.Process])
-
-function formatSpeed (upload: number, download: number) {
-    switch (true) {
-        case upload === 0 && download === 0:
-            return '-'
-        case upload !== 0 && download !== 0:
-            return `↑ ${formatTraffic(upload)}/s ↓ ${formatTraffic(download)}/s`
-        case upload !== 0:
-            return `↑ ${formatTraffic(upload)}/s`
-        default:
-            return `↓ ${formatTraffic(download)}/s`
-    }
-}
+const shouldCenter = new Set<string>([Columns.Type, Columns.Speed, Columns.Upload, Columns.Download, Columns.UlSpeed, Columns.DlSpeed, Columns.SourceIP, Columns.Time, Columns.Process])
 
 const table = createTable().setRowType<FormatConnection>()
 
@@ -127,26 +116,24 @@ export default function Connections () {
                 size: 140,
                 header: t(`columns.${Columns.Type}`),
             }),
-            table.createDataColumn(Columns.Upload, { minSize: 100, size: 100, header: t(`columns.${Columns.Upload}`), cell: cell => formatTraffic(cell.value) }),
+            table.createDataColumn(row => row.speed.download, {
+                id: Columns.DlSpeed,
+                minSize: 100,
+                size: 100,
+                header: t(`columns.${Columns.DlSpeed}`),
+                cell: cell => `${formatTraffic(cell.value)}/s`,
+                sortDescFirst: true,
+            }),
+            table.createDataColumn(row => row.speed.upload, {
+                id: Columns.UlSpeed,
+                minSize: 100,
+                size: 100,
+                header: t(`columns.${Columns.UlSpeed}`),
+                cell: cell => `${formatTraffic(cell.value)}/s`,
+                sortDescFirst: true,
+            }),
             table.createDataColumn(Columns.Download, { minSize: 100, size: 100, header: t(`columns.${Columns.Download}`), cell: cell => formatTraffic(cell.value) }),
-            table.createDataColumn(
-                row => [row.speed.upload, row.speed.download],
-                {
-                    id: Columns.Speed,
-                    header: t(`columns.${Columns.Speed}`),
-                    minSize: 200,
-                    size: 200,
-                    sortDescFirst: true,
-                    sortingFn: (rowA: any, rowB: any) => {
-                        const speedA = rowA.original?.speed ?? { upload: 0, download: 0 }
-                        const speedB = rowB.original?.speed ?? { upload: 0, download: 0 }
-                        return speedA.download === speedB.download
-                            ? speedA.upload - speedB.upload
-                            : speedA.download - speedB.download
-                    },
-                    cell: cell => formatSpeed(cell.value[0], cell.value[1]),
-                },
-            ),
+            table.createDataColumn(Columns.Upload, { minSize: 100, size: 100, header: t(`columns.${Columns.Upload}`), cell: cell => formatTraffic(cell.value) }),
             table.createDataColumn(
                 Columns.Time,
                 {
